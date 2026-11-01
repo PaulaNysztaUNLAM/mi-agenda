@@ -72,14 +72,33 @@ svg{display:block;flex-shrink:0}
 .chev{width:36px;height:36px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center}
 .wk,.grid{display:grid;grid-template-columns:repeat(7,1fr);justify-items:center}
 .wk{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:8px}
-.grid{row-gap:9px}
+.grid{row-gap:14px}
 .day{position:relative;width:38px;height:38px;border-radius:50%;border:0;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;transition:background .15s,color .15s}
 .day.out{background:transparent;color:var(--ink-faint);font-weight:700}
 .day.today{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface)}
 .day.sel{background:var(--accent);color:var(--accent-ink);box-shadow:none}
-.badge{position:absolute;top:-7px;right:-8px;width:21px;height:21px;border-radius:50%;background:var(--surface);color:var(--ink);display:grid;place-items:center;pointer-events:none}
-.day.out .badge{opacity:.55}
-.badge.more::after{content:"";position:absolute;bottom:-1px;right:-1px;width:6px;height:6px;border-radius:50%;background:var(--accent);border:1.5px solid var(--surface)}
+.badges{position:absolute;top:-7px;right:-8px;display:flex;pointer-events:none}
+.badges.multi{right:auto;left:50%;transform:translateX(-50%);top:-11px}
+.badge{width:21px;height:21px;border-radius:50%;background:var(--surface);color:var(--ink);display:grid;place-items:center;flex-shrink:0}
+.badges.multi .badge{width:18px;height:18px;margin-left:-3px;box-shadow:0 0 0 1.5px var(--surface)}
+.badges.multi .badge:first-child{margin-left:0}
+.day.out .badges{opacity:.55}
+.badges.more::after{content:"";position:absolute;top:-1px;right:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent);border:1.5px solid var(--surface)}
+.day.tinted.out{opacity:.5}
+.day.tinted.sel{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px var(--accent)}
+.day.tinted.today{box-shadow:inset 0 0 0 2px var(--ink)}
+.day.tinted.today.sel{box-shadow:inset 0 0 0 2px var(--ink),0 0 0 2.5px var(--surface),0 0 0 4.5px var(--accent)}
+.typerow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.typerow .ic{width:46px;height:46px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0;color:var(--ink)}
+.typerow .ic[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink)}
+.typerow .lbl{flex:1;font-weight:800}
+.typerow input{flex:1;min-width:0}
+.typerow .x{width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--ink-soft);display:grid;place-items:center;flex-shrink:0}
+.cdot{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;flex-shrink:0;color:var(--ink-faint);padding:0}
+.cdot[aria-expanded="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:6px 2px 14px;justify-items:center}
+.cgrid button{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;padding:0;color:var(--ink-faint);background:var(--surface)}
+.cgrid button.on{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
 
 /* Urgentes y emojis */
 .day.urgent{background:var(--urgent);color:var(--urgent-ink)}
@@ -336,10 +355,16 @@ const TYPES = new Proxy(BASE_TYPES, {get(t, k){
   return {label, field:'Título', ph:'Ej: Título del evento'};
 }});
 const customIds = () => (state.customTypes || []).map(c => c.id);
-const typeOrder = () => ['examen','tp','viaje', ...customIds(), 'evento'];
+const typeOrder = () => ['examen','tp','viaje','evento', ...customIds()];   // mismo orden que en Configuración
 const SKINS = {rosa:'Rosa', celeste:'Celeste', crema:'Crema'};
 const SKIN_BG = {rosa:'#F7E1E7', celeste:'#AFC4DA', crema:'#D9C9B2'};
 const MAGIC_ICONS = ICON_CHOICES.filter(n => n !== 'none');
+const DAY_COLORS = ['#C9B6E4','#A8DCC6','#F7C59F','#F5DD8C','#9CC8EC','#F4AFC6','#B5C99A','#7E6BB0','#3F6FB5','#3E8E6A','#E07B39','#9AA3AD'];
+const COLOR_NAMES = {'#C9B6E4':'Lila','#A8DCC6':'Menta','#F7C59F':'Durazno','#F5DD8C':'Amarillo','#9CC8EC':'Celeste','#F4AFC6':'Rosa','#B5C99A':'Salvia','#7E6BB0':'Violeta','#3F6FB5':'Azul','#3E8E6A':'Verde','#E07B39':'Naranja','#9AA3AD':'Gris'};
+function inkFor(hex){
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return (0.299*r + 0.587*g + 0.114*b) / 255 > 0.6 ? '#2A2630' : '#FFFFFF';
+}
 
 /* ---------- Fechas ---------- */
 const pad = n => String(n).padStart(2,'0');
@@ -362,6 +387,7 @@ function seed(){
   return {
     skin:'celeste',
     icons:{viaje:'plane', examen:'exam', tp:'laptop', evento:'dot', c_cumple:'cake'},
+    colors:{examen:'#C9B6E4', tp:'#A8DCC6'},
     customTypes:[{id:'c_cumple', label:'Cumpleaños'}],
     studyDays:15,
     magic:[
@@ -392,7 +418,7 @@ function emptyState(){ const s = seed(); s.events = []; s.todos = {}; s.autoDone
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw){ const o = JSON.parse(raw); const s = seed(); return Object.assign(s, o, {icons:Object.assign(s.icons, o.icons||{})}); }
+    if(raw){ const o = JSON.parse(raw); const s = seed(); return Object.assign(s, o, {icons:Object.assign(s.icons, o.icons||{}), colors:Object.assign(s.colors, o.colors||{})}); }
   }catch(e){}
   return emptyState();
 }
@@ -404,6 +430,7 @@ let view = {y:new Date().getFullYear(), m:new Date().getMonth()};
 let route = 'cal';
 let form = null;          // estado de la hoja de evento
 let openIcon = null;      // tipo cuyo selector de ícono está abierto
+let openColor = null;     // tipo cuyo selector de color está abierto
 let openMagic = null, addUrgent = false;
 let undoFn = null, toastT = null, resetArmed = false;
 
@@ -456,17 +483,24 @@ function renderCalendar(){
   const dim = new Date(y,m+1,0).getDate();
   const cells = Math.ceil((offset+dim)/7)*7;
   const t = todayIso();
+  const order = typeOrder();
   let html = '';
   for(let i=0;i<cells;i++){
     const d = new Date(y,m,1-offset+i);
     const s = iso(d);
     const out = d.getMonth() !== m;
     const evs = eventsOn(s);
-    const types = typeOrder().filter(tp => evs.some(e => e.type === tp) && state.icons[tp] !== 'none');
-    const cls = ['day', out&&'out', s===t&&'today', s===sel&&'sel', dayUrgent(s)&&'urgent'].filter(Boolean).join(' ');
-    const badge = types.length ? `<span class="badge${types.length>1?' more':''}">${ico(state.icons[types[0]],13,2.2)}</span>` : '';
+    const withIcon = evs.filter(e => state.icons[e.type] && state.icons[e.type] !== 'none')
+      .sort((a,b) => order.indexOf(a.type) - order.indexOf(b.type));
+    const shown = withIcon.slice(0, 3), multi = shown.length > 1;
+    const badge = shown.length ? `<span class="badges${multi?' multi':''}${withIcon.length>3?' more':''}">${shown.map(e => `<span class="badge">${ico(state.icons[e.type], multi?11:13, 2.2)}</span>`).join('')}</span>` : '';
+    const urgent = dayUrgent(s);
+    const tintType = urgent ? null : order.find(tp => state.colors && state.colors[tp] && evs.some(e => e.type === tp));
+    const tint = tintType ? state.colors[tintType] : '';
+    const style = tint ? ` style="background:${tint};color:${inkFor(tint)}"` : '';
+    const cls = ['day', out&&'out', s===t&&'today', s===sel&&'sel', urgent&&'urgent', tint&&'tinted'].filter(Boolean).join(' ');
     const label = `${d.getDate()} de ${fmtMonth.format(d)}${evs.length?`, ${evs.length} evento${evs.length>1?'s':''}`:''}`;
-    html += `<button class="${cls}" data-act="day" data-date="${s}" aria-label="${label}" ${s===sel?'aria-current="date"':''}>${d.getDate()}${badge}</button>`;
+    html += `<button class="${cls}" data-act="day" data-date="${s}" aria-label="${label}"${style} ${s===sel?'aria-current="date"':''}>${d.getDate()}${badge}</button>`;
   }
   $('grid').innerHTML = html;
 }
@@ -519,20 +553,25 @@ function renderSettings(){
       ${SKINS[k]}
     </button>`).join('');
   const iconGrid = tp => `<div class="icgrid">${ICON_CHOICES.map(n => `<button class="icopt${state.icons[tp]===n?' on':''}" data-act="icon-pick" data-type="${tp}" data-val="${n}" aria-label="${ICON_NAMES[n]}" title="${ICON_NAMES[n]}">${n==='none'?'Ninguno':ico(n,20)}</button>`).join('')}</div>`;
-  const rows = ['viaje','examen','tp','evento'].map(tp => `
-    <button class="icrow" data-act="icon-open" data-type="${tp}" aria-expanded="${openIcon===tp}">
-      <span class="ic">${ico(state.icons[tp],20) || ico('x',16)}</span>
+  const col = tp => (state.colors && state.colors[tp]) || '';
+  const colorBtn = tp => `<button class="cdot" data-act="color-open" data-type="${tp}" aria-expanded="${openColor===tp}" aria-label="Color del día: ${col(tp) ? COLOR_NAMES[col(tp)] || 'personalizado' : 'ninguno'}" style="${col(tp) ? `background:${col(tp)};border-color:${col(tp)}` : ''}">${col(tp) ? '' : ico('x',16)}</button>`;
+  const colorGrid = tp => `<div class="cgrid"><button class="${!col(tp)?'on':''}" data-act="color-pick" data-type="${tp}" data-val="" aria-label="Sin color" title="Sin color">${ico('x',16)}</button>${DAY_COLORS.map(c => `<button class="${col(tp)===c?'on':''}" data-act="color-pick" data-type="${tp}" data-val="${c}" aria-label="${COLOR_NAMES[c]}" title="${COLOR_NAMES[c]}" style="background:${c};border-color:${c}"></button>`).join('')}</div>`;
+  const panels = tp => (openIcon===tp ? iconGrid(tp) : '') + (openColor===tp ? colorGrid(tp) : '');
+  const rows = ['examen','tp','viaje','evento'].map(tp => `
+    <div class="typerow">
+      <button class="ic" data-act="icon-open" data-type="${tp}" aria-expanded="${openIcon===tp}" aria-label="Cambiar ícono de ${TYPES[tp].label}">${ico(state.icons[tp],20) || ico('x',16)}</button>
       <span class="lbl">${TYPES[tp].label}</span>
-      <span class="cur">${ICON_NAMES[state.icons[tp]]}</span>
-    </button>
-    ${openIcon===tp ? iconGrid(tp) : ''}
+      ${colorBtn(tp)}
+    </div>
+    ${panels(tp)}
   `).join('') + (state.customTypes || []).map(c => `
-    <div class="magic">
+    <div class="typerow">
       <button class="ic" data-act="icon-open" data-type="${c.id}" aria-expanded="${openIcon===c.id}" aria-label="Cambiar ícono">${ico(state.icons[c.id],20) || ico('x',16)}</button>
       <input type="text" data-ctype="${c.id}" value="${esc(c.label)}" placeholder="Nombre, ej: Cumpleaños" maxlength="20">
+      ${colorBtn(c.id)}
       <button class="x" data-act="ctype-del" data-id="${c.id}" aria-label="Borrar tipo ${esc(c.label)}">${ico('trash',17)}</button>
     </div>
-    ${openIcon===c.id ? iconGrid(c.id) : ''}`).join('');
+    ${panels(c.id)}`).join('');
   const magicRows = (state.magic || []).map(r => `
     <div class="magic">
       <button class="ic" data-act="magic-open" data-id="${r.id}" aria-expanded="${openMagic===r.id}" aria-label="Cambiar ícono">${ico(r.icon,20)}</button>
@@ -547,8 +586,8 @@ function renderSettings(){
       <div class="swatches">${sw}</div>
     </section>
     <section class="block set">
-      <h2>Íconos del calendario</h2>
-      <p class="sub">Se muestran sobre el círculo del día que tiene ese tipo de evento. Podés crear tipos nuevos, como Cumpleaños o Médico, y aparecen al agregar un evento.</p>
+      <h2>Íconos y colores del calendario</h2>
+      <p class="sub">El ícono aparece arriba del día (hasta 3 por día). El círculo de la derecha elige el color con el que se pinta el día; si un día tiene varios tipos, gana el que está más arriba en la lista. Podés crear tipos nuevos, como Cumpleaños o Médico.</p>
       ${rows}
       <button class="addmagic" data-act="ctype-add">${ico('plus',18)} Agregar tipo de evento</button>
     </section>
@@ -770,7 +809,7 @@ document.addEventListener('click', e => {
       const id = b.dataset.id;
       state.customTypes = state.customTypes.filter(c => c.id !== id);
       state.events.forEach(ev => { if(ev.type === id) ev.type = 'evento'; });
-      delete state.icons[id]; if(openIcon === id) openIcon = null;
+      delete state.icons[id]; if(state.colors) delete state.colors[id]; if(openIcon === id) openIcon = null; if(openColor === id) openColor = null;
       save(); renderAll(); toast('Tipo borrado. Sus eventos pasaron a “Evento”.');
       break;
     }
@@ -780,7 +819,9 @@ document.addEventListener('click', e => {
     case 'magic-add': { const r = {id:uid(), words:'', icon:'star'}; state.magic.push(r); openMagic = r.id; save(); renderSettings(); const inp = document.querySelector(`[data-magic="${r.id}"]`); if(inp) inp.focus(); break; }
     case 'todo-add': addTodo(); break;
     case 'skin': state.skin = b.dataset.val; save(); applySkin(); renderSettings(); break;
-    case 'icon-open': openIcon = openIcon === b.dataset.type ? null : b.dataset.type; renderSettings(); break;
+    case 'icon-open': openIcon = openIcon === b.dataset.type ? null : b.dataset.type; openColor = null; renderSettings(); break;
+    case 'color-open': openColor = openColor === b.dataset.type ? null : b.dataset.type; openIcon = null; renderSettings(); break;
+    case 'color-pick': state.colors = state.colors || {}; state.colors[b.dataset.type] = b.dataset.val; save(); renderSettings(); renderCalendar(); break;
     case 'icon-pick': state.icons[b.dataset.type] = b.dataset.val; save(); renderSettings(); renderCalendar(); renderDay(); break;
     case 'study': state.studyDays = Math.min(30, Math.max(1, state.studyDays + Number(b.dataset.val))); save(); renderSettings(); renderTodos(); renderDay(); break;
     case 'reset':
@@ -834,7 +875,7 @@ document.addEventListener('change', e => {
       const o = JSON.parse(r.result);
       if(!o || !Array.isArray(o.events)) throw new Error('formato');
       const s = emptyState();
-      state = Object.assign(s, o, {icons:Object.assign(s.icons, o.icons||{})});
+      state = Object.assign(s, o, {icons:Object.assign(s.icons, o.icons||{}), colors:Object.assign(s.colors, o.colors||{})});
       save(); sel = todayIso(); renderAll(); toast('Copia cargada.');
     }catch(err){ toast('Ese archivo no es una copia de Mi agenda.'); }
     e.target.value = '';
