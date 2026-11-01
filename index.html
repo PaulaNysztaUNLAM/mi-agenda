@@ -158,19 +158,35 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 /* Cajón lateral */
 .overlay{position:absolute;inset:0;background:rgba(10,12,16,.38);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
 .overlay.on{opacity:1;pointer-events:auto}
-.drawer{position:absolute;top:0;bottom:0;left:0;width:78%;max-width:300px;background:var(--surface);border-radius:0 34px 34px 0;transform:translateX(-102%);transition:transform .28s cubic-bezier(.3,.7,.2,1);z-index:21;padding:70px 16px 24px;display:flex;flex-direction:column;gap:6px}
+.drawer{position:absolute;top:0;bottom:0;left:0;width:78%;max-width:300px;background:var(--surface);border-radius:0 34px 34px 0;transform:translateX(-102%);transition:transform .28s cubic-bezier(.3,.7,.2,1);z-index:21;padding:70px 16px 24px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
 .drawer.on{transform:none}
 .drawer .brand{font-family:"Caveat",cursive;font-size:36px;padding:0 12px 18px}
 .navitem{display:flex;align-items:center;gap:14px;border:0;background:transparent;padding:14px 14px;border-radius:20px;font-weight:800;font-size:16px;text-align:left}
 .navitem.on{background:var(--surface-2)}
+.riddle{margin-top:14px;background:var(--surface-2);border-radius:24px;padding:16px}
+.riddle .rtitle{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+.riddle .rq{font-size:16px;font-weight:700;line-height:1.45;margin:0 0 12px}
+.riddle .rrow{display:flex;gap:6px}
+.riddle input{flex:1;min-width:0;background:var(--surface)}
+.riddle .rgo{height:46px;padding:0 14px;border-radius:16px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:800}
+.riddle .rmsg{font-size:14px;font-weight:700;margin:10px 2px 0;line-height:1.4}
+.riddle .rmsg.bad{color:var(--urgent)}
+.riddle .rgive{border:0;background:transparent;color:var(--ink-soft);font-weight:700;font-size:13px;text-decoration:underline;padding:8px 2px 0}
+.riddle .rok{background:var(--accent);color:var(--accent-ink);border-radius:16px;padding:12px 14px;font-weight:800;line-height:1.4;animation:pop .35s ease}
+.riddle .rrev{background:var(--surface);border-radius:16px;padding:12px 14px;font-weight:700;line-height:1.4}
+.riddle .rstreak{font-size:12px;color:var(--ink-soft);font-weight:700;margin:10px 2px 0}
+@keyframes pop{0%{transform:scale(.9);opacity:0}70%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.riddle .shake{animation:shake .25s ease 2}
 
 /* Hoja inferior */
 .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:34px 34px 0 0;transform:translateY(102%);transition:transform .3s cubic-bezier(.3,.7,.2,1);z-index:22;max-height:90%;overflow-y:auto;padding:10px 18px 26px}
 .sheet.on{transform:none}
 .grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
 .sheet h3{margin:0 0 14px;font-size:20px;font-weight:800}
-.types{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.chip{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:18px;border:0;background:var(--surface-2);font-weight:800;font-size:13px;min-height:68px;justify-content:center}
+.types{display:flex;gap:8px;overflow-x:auto;margin:0 -18px 14px;padding:2px 18px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.types::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:6px;padding:0 14px;height:40px;border-radius:20px;border:0;background:var(--surface-2);font-weight:800;font-size:13px;white-space:nowrap;flex-shrink:0;scroll-snap-align:start}
 .chip.on{background:var(--accent);color:var(--accent-ink)}
 .field{display:block;margin-bottom:12px}
 .field>span{display:block;font-size:13px;font-weight:800;color:var(--ink-soft);margin:0 0 6px 4px}
@@ -190,6 +206,12 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 .tgrid button.on,.ampm button.on{background:var(--accent);color:var(--accent-ink)}
 .ampm{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 12px}
 .tpanel .done{width:100%;height:42px;border-radius:21px;border:0;background:var(--surface);font-weight:800;margin-top:12px;color:var(--ink)}
+.reps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.reps button{height:42px;border-radius:14px;border:0;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:13px}
+.reps button.on{background:var(--accent);color:var(--accent-ink)}
+.ev .rep{display:inline-flex;vertical-align:-2px;margin-left:5px}
+.delrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.delrow button{height:44px;border-radius:22px;border:1.5px solid var(--ink-soft);background:transparent;color:var(--ink-soft);font-weight:800;font-size:14px}
 .err{color:#b3261e;font-size:13px;font-weight:800;margin:-4px 4px 10px;min-height:0}
 .actions{display:flex;gap:10px;margin-top:6px}
 .btn{flex:1;height:52px;border-radius:26px;border:0;font-weight:800;font-size:16px}
@@ -283,6 +305,7 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
         <div class="brand">Mi agenda</div>
         <button class="navitem" data-act="nav" data-route="cal"></button>
         <button class="navitem" data-act="nav" data-route="set"></button>
+        <section class="riddle" id="riddle" aria-live="polite"></section>
       </nav>
 
       <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></div>
@@ -330,6 +353,7 @@ const P = {
   x:'<path d="M18 6 6 18M6 6l12 12"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   flag:'<path d="M5 22V3M5 4h12l-2.5 4.5L17 13H5"/>',
   notebook:'<rect x="5" y="2" width="15" height="20" rx="2"/><path d="M3 6h4M3 10h4M3 14h4M3 18h4M10 7h6M10 11h6"/>',
   wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M16 14h.01"/>',
@@ -437,11 +461,30 @@ let undoFn = null, toastT = null, resetArmed = false;
 const $ = id => document.getElementById(id);
 
 /* ---------- Datos derivados ---------- */
-function eventsOn(s){
-  return state.events.filter(e => s >= e.date && s <= (e.endDate || e.date))
-    .sort((a,b) => (b.allDay?1:0)-(a.allDay?1:0) || startOn(a,s).localeCompare(startOn(b,s)));
+/* ¿El evento (o su repetición) empieza el día o? */
+function startsOn(e, o){
+  if(o < e.date) return false;
+  if(e.until && o > e.until) return false;
+  if(e.skip && e.skip.includes(o)) return false;
+  if(!e.repeat || o === e.date) return o === e.date;
+  if(e.repeat === 'day') return true;
+  if(e.repeat === 'week') return diffDays(e.date, o) % 7 === 0;
+  if(e.repeat === 'month') return parse(o).getDate() === parse(e.date).getDate();
+  return false;
 }
-function startOn(e, s){ return !e.allDay && e.date < s ? '00:00' : (e.start || ''); }
+function eventsOn(s){
+  const out = [];
+  state.events.forEach(e => {
+    const span = e.endDate ? Math.max(0, diffDays(e.date, e.endDate)) : 0;
+    for(let k = 0; k <= span; k++){
+      const o = addDays(s, -k);
+      if(startsOn(e, o)){ out.push({...e, _occ:o, _occEnd:addDays(o, span)}); break; }
+    }
+  });
+  return out.sort((a,b) => (b.allDay?1:0)-(a.allDay?1:0) || startOn(a,s).localeCompare(startOn(b,s)));
+}
+const REPEAT_TXT = {day:'Se repite todos los días', week:'Se repite cada semana', month:'Se repite cada mes'};
+function startOn(e, s){ return !e.allDay && (e._occ || e.date) < s ? '00:00' : (e.start || ''); }
 function crossesMidnight(e){ return !e.allDay && e.type !== 'viaje' && e.endDate && e.endDate > e.date;
 }
 function autoTodos(s){
@@ -516,17 +559,17 @@ function renderDay(){
   $('evlist').innerHTML = evs.length ? evs.map(e => {
     let time;
     if(e.allDay){
-      time = e.endDate && e.endDate !== e.date ? `Todo el día, del ${shortDate(e.date)} al ${shortDate(e.endDate)}` : 'Todo el día';
+      time = e._occEnd !== e._occ ? `Todo el día, del ${shortDate(e._occ)} al ${shortDate(e._occEnd)}` : 'Todo el día';
     } else {
-      if(crossesMidnight(e) && sel > e.date) time = `Empezó ayer a las ${fmtT(e.start)}, termina ${fmtT(e.end)}`;
+      if(crossesMidnight(e) && sel > e._occ) time = `Empezó ayer a las ${fmtT(e.start)}, termina ${fmtT(e.end)}`;
       else if(crossesMidnight(e)) time = `${fmtT(e.start)} – ${fmtT(e.end)} del día siguiente`;
       else time = e.end ? `${fmtT(e.start)} – ${fmtT(e.end)}` : fmtT(e.start);
     }
     const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
-    return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}">
+    return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}" data-occ="${e._occ}">
       <span class="ic">${ico(state.icons[e.type] === 'none' ? 'dot' : state.icons[e.type],18)}</span>
-      <span class="body"><div class="time">${time}</div><div class="name">${esc(pre+e.title)}</div></span>
-      <button class="del" data-act="del" data-id="${e.id}" aria-label="Eliminar ${esc(e.title)}">${ico('trash',17)}</button>
+      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div></span>
+      <button class="del" data-act="del" data-id="${e.id}" data-occ="${e._occ}" aria-label="${e.repeat ? 'Eliminar solo este día de ' : 'Eliminar '}${esc(e.title)}">${ico('trash',17)}</button>
     </div>`;
   }).join('') : `<p class="empty">No tenés eventos este día. Tocá + para agregar uno.</p>`;
 }
@@ -649,8 +692,8 @@ function renderAll(){
 }
 
 /* ---------- Hoja de evento ---------- */
-function openSheet(ev){
-  form = ev ? {...ev, allDay:!!ev.allDay} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false};
+function openSheet(ev, occ){
+  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:''};
   drawSheet(); $('sheet').classList.add('on'); $('overlay').classList.add('on');
   setTimeout(() => { const i = $('fTitle'); if(i && !ev) i.focus(); }, 320);
 }
@@ -661,26 +704,35 @@ function drawSheet(err=''){
     <div class="grab"></div>
     <h3 id="sheetTitle">${f.id ? 'Editar' : 'Nuevo'} ${T.label.toLowerCase()}</h3>
     <div class="types" role="radiogroup" aria-label="Tipo">
-      ${['evento','examen','tp','viaje', ...customIds()].map(tp => `<button class="chip${f.type===tp?' on':''}" role="radio" aria-checked="${f.type===tp}" data-act="ftype" data-val="${tp}">${ico(state.icons[tp]==='none'?'dot':state.icons[tp],20)}${TYPES[tp].label}</button>`).join('')}
+      ${['evento','examen','tp','viaje', ...customIds()].map(tp => `<button class="chip${f.type===tp?' on':''}" role="radio" aria-checked="${f.type===tp}" data-act="ftype" data-val="${tp}">${ico(state.icons[tp]==='none'?'dot':state.icons[tp],16)}${esc(TYPES[tp].label)}</button>`).join('')}
     </div>
     <label class="field"><span>${T.field}</span><input type="text" id="fTitle" value="${esc(f.title)}" placeholder="${T.ph}" maxlength="40"></label>
-    <div class="${f.type==='viaje'?'row2':''}">
-      <label class="field"><span>${f.type==='viaje'?'Desde':'Fecha'}</span><input type="date" id="fDate" value="${f.date}"></label>
-      ${f.type==='viaje' ? `<label class="field"><span>Hasta</span><input type="date" id="fEndDate" value="${f.endDate||f.date}"></label>` : ''}
-    </div>
-    <button class="toggle" role="switch" aria-checked="${f.allDay}" data-act="fallday">Todo el día <span class="sw-track"></span></button>
     ${f.allDay ? '' : `<div class="row2">
       <div class="field"><span>Empieza</span><button class="timebtn${f.pick==='start'?' on':''}" data-act="tpick" data-val="start" aria-expanded="${f.pick==='start'}">${f.start ? fmtT(f.start) : 'Elegir hora'}</button></div>
       <div class="field"><span>Termina</span><button class="timebtn${f.pick==='end'?' on':''}" data-act="tpick" data-val="end" aria-expanded="${f.pick==='end'}">${f.end ? fmtT(f.end) + (f.start && f.end < f.start ? ' (día siguiente)' : '') : 'Elegir hora'}</button></div>
     </div>
     ${f.pick ? timePanel(f[f.pick] || '09:00') : ''}`}
+    <div class="${f.type==='viaje'?'row2':''}">
+      <label class="field"><span>${f.type==='viaje'?'Desde':f.repeat?'Empieza el':'Fecha'}</span><input type="date" id="fDate" value="${f.date}"></label>
+      ${f.type==='viaje' ? `<label class="field"><span>Hasta</span><input type="date" id="fEndDate" value="${f.endDate||f.date}"></label>` : ''}
+    </div>
+    <button class="toggle" role="switch" aria-checked="${f.allDay}" data-act="fallday">Todo el día <span class="sw-track"></span></button>
+    <div class="field"><span>Se repite</span></div>
+    <div class="reps" role="radiogroup" aria-label="Se repite">
+      ${[['','No'],['day','Diario'],['week','Semanal'],['month','Mensual']].map(([v,l]) => `<button class="${(f.repeat||'')===v?'on':''}" role="radio" aria-checked="${(f.repeat||'')===v}" data-act="frepeat" data-val="${v}">${l}</button>`).join('')}
+    </div>
+    ${f.repeat ? `<label class="field"><span>Hasta (opcional)</span><input type="date" id="fUntil" value="${f.until||''}"></label>
+    <p class="hint">${ico('repeat',18)}<span>${repeatHint(f)}</span></p>` : ''}
     ${f.type==='examen' ? `<p class="hint">${ico('info',18)}<span>Se va a agregar “Estudiar ${esc(f.title||'materia')} (N)” en Pendientes durante los ${n} días anteriores al examen.</span></p>` : ''}
     ${err ? `<p class="err" role="alert">${err}</p>` : ''}
+    ${f.id && f.repeat ? `<div class="delrow"><button data-act="fdelete-one">Borrar solo este día</button><button data-act="fdelete">Borrar todos</button></div>` : ''}
     <div class="actions">
-      ${f.id ? `<button class="btn danger" data-act="fdelete" aria-label="Eliminar">${ico('trash',18)}</button>` : ''}
+      ${f.id && !f.repeat ? `<button class="btn danger" data-act="fdelete" aria-label="Eliminar">${ico('trash',18)}</button>` : ''}
       <button class="btn ghost" data-act="close-all">Cancelar</button>
       <button class="btn primary" data-act="fsave">Guardar</button>
     </div>`;
+  const tw = $('sheet').querySelector('.types'), on = tw && tw.querySelector('.chip.on');
+  if(tw && on) tw.scrollLeft = Math.max(0, on.offsetLeft - tw.firstElementChild.offsetLeft - 40);
 }
 /* ---------- Selector de hora: AM = 00–11, PM = 12–23 ---------- */
 function splitT(hm){ const [h, m] = hm.split(':').map(Number); return {h, m}; }
@@ -708,6 +760,13 @@ function setPickTime(change){
   if(field === 'start') form.end = plusHour(form.start);   // termina 1 hora después
   drawSheet();
 }
+function repeatHint(f){
+  const d = parse(f.date || sel);
+  const base = f.repeat === 'day' ? 'Todos los días' : f.repeat === 'week' ? `Todos los ${fmtWd.format(d).replace(/([^s])$/, '$1s')}` : `Todos los días ${d.getDate()} de cada mes`;
+  const end = f.until ? `, hasta el ${shortDate(f.until)}` : ', sin fecha de fin';
+  const extra = f.repeat === 'month' && d.getDate() > 28 ? ' Los meses que no tienen ese día se saltean.' : '';
+  return base + end + '.' + extra;
+}
 function readForm(){
   const v = id => { const el = $(id); return el ? el.value : undefined; };
   if(v('fTitle') !== undefined) form.title = v('fTitle');
@@ -715,6 +774,7 @@ function readForm(){
   if(v('fEndDate') !== undefined) form.endDate = v('fEndDate');
   if(v('fStart') !== undefined) form.start = v('fStart');
   if(v('fEnd') !== undefined) form.end = v('fEnd');
+  if(v('fUntil') !== undefined) form.until = v('fUntil');
 }
 function saveForm(){
   readForm();
@@ -729,15 +789,25 @@ function saveForm(){
     if(!f.start) return drawSheet('Indicá la hora de inicio o marcá “Todo el día”.');
     if(f.end && f.end === f.start) return drawSheet('La hora de fin tiene que ser distinta a la de inicio.');
   } else { delete f.start; delete f.end; }
+  if(f.repeat && f.until && f.until < f.date) return drawSheet('La fecha “Hasta” no puede ser antes que el inicio.');
   const isNew = !f.id;
+  const occ = f._occ;
   const ev = {...f, id:f.id || uid()};
+  delete ev._occ; delete ev.pick;
   if(!ev.allDay) delete ev.allDay;
+  if(!ev.repeat){ delete ev.repeat; delete ev.until; delete ev.skip; }
+  else if(!ev.until) delete ev.until;
   if(isNew) state.events.push(ev); else state.events = state.events.map(e => e.id === ev.id ? ev : e);
   save();
-  sel = ev.date; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()};
+  sel = ev.repeat && occ && startsOn(ev, occ) ? occ : ev.date; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()};
   closeAll(); renderAll();
   const label = TYPES[ev.type].label;
-  toast(ev.type === 'examen' ? `Examen guardado. Tareas de estudio agregadas.` : `${label} guardado.`);
+  toast(ev.type === 'examen' ? `Examen guardado. Tareas de estudio agregadas.` : ev.repeat ? `${label} guardado. ${REPEAT_TXT[ev.repeat]}.` : `${label} guardado.`);
+}
+
+function skipOne(ev, occ){
+  ev.skip = [...(ev.skip || []), occ]; save(); renderAll();
+  toast('Se borró solo ese día.', () => { ev.skip = ev.skip.filter(x => x !== occ); save(); renderAll(); });
 }
 
 /* ---------- Utilidades UI ---------- */
@@ -772,7 +842,11 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if(!b) return;
   const a = b.dataset.act;
   switch(a){
-    case 'menu': $('drawer').classList.add('on'); $('overlay').classList.add('on'); break;
+    case 'menu': renderRiddle(); $('drawer').classList.add('on'); $('overlay').classList.add('on'); break;
+    case 'riddle-try': tryRiddle(); break;
+    case 'riddle-give': {
+      const r = todayRiddleState(); r.revealed = true; save(); renderRiddle(); break;
+    }
     case 'close-all': closeAll(); break;
     case 'nav': route = b.dataset.route; resetArmed = false; openIcon = null; closeAll(); renderAll(); $(route==='cal'?'view-cal':'view-set').scrollTop = 0; break;
     case 'prev': goMonth(-1); break;
@@ -780,10 +854,12 @@ document.addEventListener('click', e => {
     case 'today': { sel = todayIso(); const d = new Date(); view = {y:d.getFullYear(), m:d.getMonth()}; renderAll(); break; }
     case 'day': { sel = b.dataset.date; const d = parse(sel); if(d.getMonth() !== view.m){ view = {y:d.getFullYear(), m:d.getMonth()}; } renderCalendar(); renderDay(); renderTodos(); break; }
     case 'add': openSheet(null); break;
-    case 'edit': openSheet(state.events.find(x => x.id === b.dataset.id)); break;
+    case 'edit': openSheet(state.events.find(x => x.id === b.dataset.id), b.dataset.occ); break;
+    case 'frepeat': readForm(); form.repeat = b.dataset.val; drawSheet(); break;
     case 'del': {
       e.stopPropagation();
       const ev = state.events.find(x => x.id === b.dataset.id); if(!ev) break;
+      if(ev.repeat){ skipOne(ev, b.dataset.occ); break; }
       state.events = state.events.filter(x => x.id !== ev.id); save(); renderAll();
       toast(`${TYPES[ev.type].label} eliminado.`, () => { state.events.push(ev); save(); renderAll(); });
       break;
@@ -843,6 +919,7 @@ document.addEventListener('click', e => {
     case 'tap': setPickTime({pm:b.dataset.val === 'pm'}); break;
     case 'fallday': readForm(); form.allDay = !form.allDay; if(!form.allDay && !form.start){ form.start = '09:00'; form.end = '10:00'; } drawSheet(); break;
     case 'fsave': saveForm(); break;
+    case 'fdelete-one': { const ev = state.events.find(x => x.id === form.id), occ = form._occ; closeAll(); if(ev) skipOne(ev, occ); break; }
     case 'fdelete': {
       const ev = state.events.find(x => x.id === form.id); closeAll();
       if(ev){ state.events = state.events.filter(x => x.id !== ev.id); save(); renderAll(); toast(`${TYPES[ev.type].label} eliminado.`, () => { state.events.push(ev); save(); renderAll(); }); }
@@ -853,9 +930,104 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape') closeAll();
   if(e.key === 'Enter' && e.target.id === 'todoInput') addTodo();
+  if(e.key === 'Enter' && e.target.id === 'riddleInput') tryRiddle();
   if(e.key === 'Enter' && e.target.closest('.sheet') && e.target.tagName === 'INPUT') saveForm();
   if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('ev')){ e.preventDefault(); e.target.click(); }
 });
+/* ---------- Acertijo del día ---------- */
+const RIDDLES = [
+  {q:'Oro parece, plata no es. ¿Qué es?', a:'Plátano', ok:['platano','banana']},
+  {q:'Blanco por dentro, verde por fuera. Si querés que te lo diga, espera.', a:'Pera', ok:['pera']},
+  {q:'Agua pasa por mi casa, cate de mi corazón.', a:'Aguacate', ok:['aguacate','palta']},
+  {q:'Tiene dientes y no come, tiene cabeza y no es hombre.', a:'Ajo', ok:['ajo']},
+  {q:'Vuela sin alas, silba sin boca, empuja sin manos y nadie lo ve.', a:'Viento', ok:['viento','aire']},
+  {q:'Cuanto más le sacás, más grande se hace.', a:'Agujero', ok:['agujero','pozo','hoyo']},
+  {q:'Tengo agujas y no sé coser, tengo números y no sé leer.', a:'Reloj', ok:['reloj']},
+  {q:'Redondo, redondo, barril sin fondo.', a:'Anillo', ok:['anillo','sortija']},
+  {q:'Si decís mi nombre, desaparezco.', a:'Silencio', ok:['silencio']},
+  {q:'Mientras más grande es, menos se ve.', a:'Oscuridad', ok:['oscuridad','oscuro']},
+  {q:'Tiene ojos y no ve, tiene agua y no la bebe, tiene carne y no la come, tiene barba y no es hombre.', a:'Coco', ok:['coco']},
+  {q:'Todos me pisan a mí, pero yo no piso a nadie; todos preguntan por mí y yo no pregunto por nadie.', a:'Calle', ok:['calle','camino']},
+  {q:'Tengo hojas y no soy árbol, tengo lomo y no soy caballo.', a:'Libro', ok:['libro']},
+  {q:'Es tuyo, pero los demás lo usan mucho más que vos.', a:'Tu nombre', ok:['nombre']},
+  {q:'Sube llena y baja vacía; si no se apura, la sopa se enfría.', a:'Cuchara', ok:['cuchara']},
+  {q:'Te lo digo y no me entendés, te lo repito y no me comprendés.', a:'Tela', ok:['tela']},
+  {q:'Corre y corre sin patas, tiene cama y no duerme, tiene boca y no habla.', a:'Río', ok:['rio']},
+  {q:'Cuanto más seca, más mojada queda.', a:'Toalla', ok:['toalla']},
+  {q:'Tiene cuello y no cabeza, tiene brazos y no manos.', a:'Camisa', ok:['camisa','remera','buzo','sweater']},
+  {q:'Lleva su casa a cuestas, camina sin tener patas y deja su huella con un hilito de plata.', a:'Caracol', ok:['caracol','babosa']},
+  {q:'Tengo blanco mi vestido y amarillo el corazón.', a:'Huevo', ok:['huevo']},
+  {q:'Una vieja con un solo diente que llama a toda la gente.', a:'Campana', ok:['campana']},
+  {q:'Tiene cuatro patas y no puede andar; tiene cabecera y no sabe hablar.', a:'Cama', ok:['cama']},
+  {q:'Soy alta cuando soy joven y baja cuando soy vieja; brillo mientras vivo y el viento es mi enemigo.', a:'Vela', ok:['vela']},
+  {q:'Tengo ciudades pero no casas, ríos pero no agua, montañas pero no piedras.', a:'Mapa', ok:['mapa','planisferio']},
+  {q:'Puedo llenar una habitación entera sin ocupar nada de lugar.', a:'Luz', ok:['luz']},
+  {q:'Tiene teclas y no es piano, tiene ratón y no es gato.', a:'Computadora', ok:['computadora','compu','pc','ordenador','computador']},
+  {q:'Siempre está por venir, pero nunca llega.', a:'Mañana', ok:['manana']},
+  {q:'Tiene un ojo y no ve; sin ella no se puede coser.', a:'Aguja', ok:['aguja']},
+  {q:'Me sacás la piel y no lloro yo, llorás vos.', a:'Cebolla', ok:['cebolla']},
+  {q:'Vuelo sin alas, lloro sin ojos, y cuando paso todo se pone gris.', a:'Nube', ok:['nube']},
+  {q:'Pequeño como un ratón, y cuida la casa como un león.', a:'Candado', ok:['candado','cerradura','llave']},
+  {q:'Tiene dientes y no muerde; peina sin tener manos.', a:'Peine', ok:['peine']},
+  {q:'Me ponen en la mesa, me cortan y me reparten, pero nadie me come.', a:'Baraja de cartas', ok:['baraja','cartas','naipes','mazo']},
+  {q:'Doce señoritas en un mirador; todas tienen medias y zapatos no.', a:'Las horas del reloj', ok:['horas','hora','reloj']},
+  {q:'Cien amigos tengo, todos en una tabla; si yo no los toco, ellos no me hablan.', a:'Piano', ok:['piano','teclado']},
+  {q:'Cuanto más lavo, más sucia me pongo.', a:'Agua', ok:['agua']},
+  {q:'Tengo patas y no camino, tengo respaldo y no duermo.', a:'Silla', ok:['silla','sillon']},
+  {q:'Me compran para comer, pero nunca me comen.', a:'Plato', ok:['plato','cubiertos','tenedor']},
+  {q:'Sin ser estrella tengo cola, sin ser rata como queso.', a:'Ratón', ok:['raton','laucha']},
+  {q:'Nace en el agua, vive en el agua y si vuelve al agua se muere.', a:'Sal', ok:['sal']},
+  {q:'Va por el río y no se moja, va por el sol y no se quema.', a:'Sombra', ok:['sombra']}
+];
+const norm = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zñ ]/g, ' ').replace(/\s+/g, ' ').trim();
+function gcd(a, b){ return b ? gcd(b, a % b) : a; }
+function todayRiddle(){
+  const n = RIDDLES.length;
+  const days = Math.round((parse(todayIso()) - new Date(2026, 0, 1)) / 86400000);
+  const step = [7, 11, 13, 17, 19, 23].find(x => gcd(x, n) === 1);
+  return RIDDLES[(((days % n) + n) % n * step + 5) % n];
+}
+function todayRiddleState(){
+  const t = todayIso();
+  if(!state.riddle || state.riddle.date !== t) state.riddle = {date:t, tries:0, solved:false, revealed:false};
+  return state.riddle;
+}
+function isRiddleAnswer(input, r){
+  const words = norm(input).split(' ').map(w => w.replace(/(es|s)$/, '')).filter(Boolean);
+  return r.ok.some(ans => { const a = norm(ans).replace(/(es|s)$/, ''); return words.includes(a) || norm(input) === norm(ans); });
+}
+function renderRiddle(msg = '', bad = false){
+  const r = todayRiddle(), st = todayRiddleState(), streak = state.riddleStreak || 0;
+  let body;
+  if(st.solved) body = `<div class="rok">¡Adivinaste! Era “${esc(r.a)}”. Mañana hay otro.</div>`;
+  else if(st.revealed) body = `<div class="rrev">Era “${esc(r.a)}”. Mañana te toca uno nuevo.</div>`;
+  else body = `<div class="rrow${bad ? ' shake' : ''}">
+      <input type="text" id="riddleInput" placeholder="¿Qué es?" maxlength="40" autocomplete="off" autocapitalize="none">
+      <button class="rgo" data-act="riddle-try">Probar</button>
+    </div>
+    ${msg ? `<p class="rmsg${bad ? ' bad' : ''}">${msg}</p>` : ''}
+    <button class="rgive" data-act="riddle-give">Me rindo, decime qué es</button>`;
+  $('riddle').innerHTML = `<div class="rtitle">${ico('star', 16)} Acertijo del día</div>
+    <p class="rq">${esc(r.q)}</p>${body}
+    ${streak > 1 && state.riddleLast >= addDays(todayIso(), -1) ? `<p class="rstreak">Racha: ${streak} días seguidos adivinando</p>` : ''}`;
+}
+function tryRiddle(){
+  const i = $('riddleInput'); if(!i) return;
+  const v = i.value.trim(); if(!v) return;
+  const r = todayRiddle(), st = todayRiddleState();
+  st.tries++;
+  if(isRiddleAnswer(v, r)){
+    st.solved = true;
+    state.riddleStreak = state.riddleLast === addDays(todayIso(), -1) ? (state.riddleStreak || 0) + 1 : 1;
+    state.riddleLast = todayIso();
+    save(); renderRiddle();
+  } else {
+    save();
+    const tips = ['No es eso. ¡Probá de nuevo!', 'Casi… pensalo un poquito más.', 'Nop. Leelo otra vez despacio.'];
+    renderRiddle(tips[(st.tries - 1) % tips.length], true);
+    const ni = $('riddleInput'); if(ni){ ni.value = v; ni.focus(); ni.select(); }
+  }
+}
 async function backup(){
   const name = `mi-agenda-${todayIso()}.json`;
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
