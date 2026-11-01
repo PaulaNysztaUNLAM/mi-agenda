@@ -162,6 +162,15 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 .toggle[aria-checked="true"] .sw-track{background:var(--accent)}
 .toggle[aria-checked="true"] .sw-track::after{transform:translateX(18px)}
 .hint{font-size:13px;color:var(--ink-soft);background:var(--surface-2);border-radius:16px;padding:10px 14px;margin:0 0 12px;line-height:1.45;display:flex;gap:10px;align-items:flex-start}
+.timebtn{width:100%;min-height:46px;border:0;background:var(--surface-2);color:var(--ink);border-radius:16px;padding:12px 14px;font-weight:800;font-size:15px;text-align:left;font-variant-numeric:tabular-nums}
+.timebtn.on{box-shadow:inset 0 0 0 2px var(--accent)}
+.tpanel{background:var(--surface-2);border-radius:20px;padding:12px;margin:0 0 12px}
+.tlabel{font-size:12px;font-weight:800;color:var(--ink-soft);margin:2px 2px 6px}
+.tgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.tgrid button,.ampm button{height:42px;border-radius:12px;border:0;background:var(--surface);color:var(--ink);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.tgrid button.on,.ampm button.on{background:var(--accent);color:var(--accent-ink)}
+.ampm{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 12px}
+.tpanel .done{width:100%;height:42px;border-radius:21px;border:0;background:var(--surface);font-weight:800;margin-top:12px;color:var(--ink)}
 .err{color:#b3261e;font-size:13px;font-weight:800;margin:-4px 4px 10px;min-height:0}
 .actions{display:flex;gap:10px;margin-top:6px}
 .btn{flex:1;height:52px;border-radius:26px;border:0;font-weight:800;font-size:16px}
@@ -403,7 +412,10 @@ const $ = id => document.getElementById(id);
 /* ---------- Datos derivados ---------- */
 function eventsOn(s){
   return state.events.filter(e => s >= e.date && s <= (e.endDate || e.date))
-    .sort((a,b) => (b.allDay?1:0)-(a.allDay?1:0) || (a.start||'').localeCompare(b.start||''));
+    .sort((a,b) => (b.allDay?1:0)-(a.allDay?1:0) || startOn(a,s).localeCompare(startOn(b,s)));
+}
+function startOn(e, s){ return !e.allDay && e.date < s ? '00:00' : (e.start || ''); }
+function crossesMidnight(e){ return !e.allDay && e.type !== 'viaje' && e.endDate && e.endDate > e.date;
 }
 function autoTodos(s){
   return state.events.filter(e => e.type === 'examen')
@@ -472,7 +484,9 @@ function renderDay(){
     if(e.allDay){
       time = e.endDate && e.endDate !== e.date ? `Todo el día, del ${shortDate(e.date)} al ${shortDate(e.endDate)}` : 'Todo el día';
     } else {
-      time = e.end ? `${e.start} – ${e.end}` : e.start;
+      if(crossesMidnight(e) && sel > e.date) time = `Empezó ayer a las ${fmtT(e.start)}, termina ${fmtT(e.end)}`;
+      else if(crossesMidnight(e)) time = `${fmtT(e.start)} – ${fmtT(e.end)} del día siguiente`;
+      else time = e.end ? `${fmtT(e.start)} – ${fmtT(e.end)}` : fmtT(e.start);
     }
     const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
     return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}">
@@ -617,9 +631,10 @@ function drawSheet(err=''){
     </div>
     <button class="toggle" role="switch" aria-checked="${f.allDay}" data-act="fallday">Todo el día <span class="sw-track"></span></button>
     ${f.allDay ? '' : `<div class="row2">
-      <label class="field"><span>Empieza</span><input type="time" id="fStart" value="${f.start||''}"></label>
-      <label class="field"><span>Termina</span><input type="time" id="fEnd" value="${f.end||''}"></label>
-    </div>`}
+      <div class="field"><span>Empieza</span><button class="timebtn${f.pick==='start'?' on':''}" data-act="tpick" data-val="start" aria-expanded="${f.pick==='start'}">${f.start ? fmtT(f.start) : 'Elegir hora'}</button></div>
+      <div class="field"><span>Termina</span><button class="timebtn${f.pick==='end'?' on':''}" data-act="tpick" data-val="end" aria-expanded="${f.pick==='end'}">${f.end ? fmtT(f.end) + (f.start && f.end < f.start ? ' (día siguiente)' : '') : 'Elegir hora'}</button></div>
+    </div>
+    ${f.pick ? timePanel(f[f.pick] || '09:00') : ''}`}
     ${f.type==='examen' ? `<p class="hint">${ico('info',18)}<span>Se va a agregar “Estudiar ${esc(f.title||'materia')} (N)” en Pendientes durante los ${n} días anteriores al examen.</span></p>` : ''}
     ${err ? `<p class="err" role="alert">${err}</p>` : ''}
     <div class="actions">
@@ -627,6 +642,32 @@ function drawSheet(err=''){
       <button class="btn ghost" data-act="close-all">Cancelar</button>
       <button class="btn primary" data-act="fsave">Guardar</button>
     </div>`;
+}
+/* ---------- Selector de hora: AM = 00–11, PM = 12–23 ---------- */
+function splitT(hm){ const [h, m] = hm.split(':').map(Number); return {h, m}; }
+function fmtT(hm){ return hm || ''; }
+function plusHour(hm){ const {h, m} = splitT(hm); const t = (h*60 + m + 60) % (24*60); return pad(Math.floor(t/60)) + ':' + pad(t % 60); }
+function timePanel(hm){
+  const t = splitT(hm), pm = t.h >= 12, base = pm ? 12 : 0;
+  const hours = Array.from({length:12}, (_, i) => base + i).map(h => `<button class="${t.h===h?'on':''}" data-act="th" data-val="${h}">${pad(h)}</button>`).join('');
+  const mins = [0,5,10,15,20,25,30,35,40,45,50,55].map(m => `<button class="${t.m===m?'on':''}" data-act="tm" data-val="${m}">:${pad(m)}</button>`).join('');
+  return `<div class="tpanel">
+    <div class="tlabel">Hora</div><div class="tgrid">${hours}</div>
+    <div class="ampm"><button class="${!pm?'on':''}" data-act="tap" data-val="am">AM</button><button class="${pm?'on':''}" data-act="tap" data-val="pm">PM</button></div>
+    <div class="tlabel">Minutos</div><div class="tgrid">${mins}</div>
+    <button class="done" data-act="tpick" data-val="">Listo</button>
+  </div>`;
+}
+function setPickTime(change){
+  readForm();
+  const field = form.pick; if(!field) return;
+  const t = splitT(form[field] || '09:00');
+  if('h' in change) t.h = change.h;
+  if('m' in change) t.m = change.m;
+  if('pm' in change) t.h = (t.h % 12) + (change.pm ? 12 : 0);
+  form[field] = pad(t.h) + ':' + pad(t.m);
+  if(field === 'start') form.end = plusHour(form.start);   // termina 1 hora después
+  drawSheet();
 }
 function readForm(){
   const v = id => { const el = $(id); return el ? el.value : undefined; };
@@ -644,9 +685,10 @@ function saveForm(){
   if(!f.date) return drawSheet('Elegí una fecha.');
   if(f.type === 'viaje'){ if(!f.endDate) f.endDate = f.date; if(f.endDate < f.date) return drawSheet('La fecha de vuelta no puede ser antes que la de ida.'); }
   else delete f.endDate;
+  if(f.type !== 'viaje' && !f.allDay && f.end && f.end < f.start) f.endDate = addDays(f.date, 1);   // pasa la medianoche
   if(!f.allDay){
     if(!f.start) return drawSheet('Indicá la hora de inicio o marcá “Todo el día”.');
-    if(f.end && f.end < f.start) return drawSheet('La hora de fin tiene que ser después de la de inicio.');
+    if(f.end && f.end === f.start) return drawSheet('La hora de fin tiene que ser distinta a la de inicio.');
   } else { delete f.start; delete f.end; }
   const isNew = !f.id;
   const ev = {...f, id:f.id || uid()};
@@ -754,6 +796,10 @@ document.addEventListener('click', e => {
     case 'backup': backup(); break;
     case 'restore': $('restoreFile').click(); break;
     case 'ftype': readForm(); form.type = b.dataset.val; if(form.type === 'viaje' && !form.endDate) form.endDate = form.date; drawSheet(); break;
+    case 'tpick': readForm(); form.pick = b.dataset.val && form.pick !== b.dataset.val ? b.dataset.val : null; drawSheet(); break;
+    case 'th': setPickTime({h:Number(b.dataset.val)}); break;
+    case 'tm': setPickTime({m:Number(b.dataset.val)}); break;
+    case 'tap': setPickTime({pm:b.dataset.val === 'pm'}); break;
     case 'fallday': readForm(); form.allDay = !form.allDay; if(!form.allDay && !form.start){ form.start = '09:00'; form.end = '10:00'; } drawSheet(); break;
     case 'fsave': saveForm(); break;
     case 'fdelete': {
