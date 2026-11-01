@@ -362,7 +362,6 @@ function seed(){
       {id:'m4', words:'comprar', icon:'cart'}
     ],
     urgentWords:'pagar, factura, vence, urgente',
-    calSync:true,
     events:[
       {id:uid(), type:'evento', title:'Caminata', date:t, start:'07:00', end:'07:45'},
       {id:uid(), type:'evento', title:'Clase de inglés', date:t, start:'18:30', end:'20:00'},
@@ -561,12 +560,6 @@ function renderSettings(){
       <input type="text" id="urgentInput" maxlength="120" value="${esc(state.urgentWords)}" placeholder="Ej: pagar, factura, vence">
     </section>
     <section class="block set">
-      <h2>Calendario del iPhone</h2>
-      <p class="sub">Cada evento nuevo se manda al Calendario del celular y aparece en su widget. iOS te muestra el evento y tenés que tocar “Agregar” una vez.</p>
-      <button class="toggle" role="switch" aria-checked="${!!state.calSync}" data-act="calsync">Enviar eventos nuevos <span class="sw-track"></span></button>
-      <button class="btn ghost" style="width:100%" data-act="calall">Enviar todos los eventos próximos</button>
-    </section>
-    <section class="block set">
       <h2>Copia de seguridad</h2>
       <p class="sub">Tus datos viven solo en este celular. Descargá una copia de vez en cuando y guardala en Drive, WhatsApp o Archivos.</p>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -629,7 +622,6 @@ function drawSheet(err=''){
     </div>`}
     ${f.type==='examen' ? `<p class="hint">${ico('info',18)}<span>Se va a agregar “Estudiar ${esc(f.title||'materia')} (N)” en Pendientes durante los ${n} días anteriores al examen.</span></p>` : ''}
     ${err ? `<p class="err" role="alert">${err}</p>` : ''}
-    ${f.id ? `<button class="btn ghost" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px" data-act="fcal">${ico('cal',18)} Enviar al Calendario del iPhone</button>` : ''}
     <div class="actions">
       ${f.id ? `<button class="btn danger" data-act="fdelete" aria-label="Eliminar">${ico('trash',18)}</button>` : ''}
       <button class="btn ghost" data-act="close-all">Cancelar</button>
@@ -664,12 +656,7 @@ function saveForm(){
   sel = ev.date; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()};
   closeAll(); renderAll();
   const label = TYPES[ev.type].label;
-  if(isNew && state.calSync){
-    sendToCalendar(ev);
-    toast(`${label} guardado y enviado al Calendario.`);
-  } else {
-    toast(ev.type === 'examen' ? `Examen guardado. Tareas de estudio agregadas.` : `${label} guardado.`);
-  }
+  toast(ev.type === 'examen' ? `Examen guardado. Tareas de estudio agregadas.` : `${label} guardado.`);
 }
 
 /* ---------- Utilidades UI ---------- */
@@ -765,13 +752,6 @@ document.addEventListener('click', e => {
       save(); renderAll(); toast('Datos de ejemplo cargados.'); break;
     }
     case 'backup': backup(); break;
-    case 'calsync': state.calSync = !state.calSync; save(); renderSettings(); break;
-    case 'calall': {
-      const t = todayIso(); const list = state.events.filter(e => (e.endDate || e.date) >= t);
-      if(!list.length){ toast('No tenés eventos próximos para enviar.'); break; }
-      sendToCalendar(list); toast(`${list.length} evento${list.length===1?'':'s'} enviado${list.length===1?'':'s'} al Calendario.`); break;
-    }
-    case 'fcal': { readForm(); const ev = state.events.find(x => x.id === form.id); if(ev){ sendToCalendar(ev); toast('Enviado al Calendario.'); } break; }
     case 'restore': $('restoreFile').click(); break;
     case 'ftype': readForm(); form.type = b.dataset.val; if(form.type === 'viaje' && !form.endDate) form.endDate = form.date; drawSheet(); break;
     case 'fallday': readForm(); form.allDay = !form.allDay; if(!form.allDay && !form.start){ form.start = '09:00'; form.end = '10:00'; } drawSheet(); break;
@@ -789,46 +769,6 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Enter' && e.target.closest('.sheet') && e.target.tagName === 'INPUT') saveForm();
   if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('ev')){ e.preventDefault(); e.target.click(); }
 });
-/* ---------- Calendario (.ics) ---------- */
-function icsEscape(t){ return String(t).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
-function icsDate(s){ return s.replace(/-/g,''); }
-function icsDateTime(s, hm){ return icsDate(s) + 'T' + hm.replace(':','') + '00'; }
-function plusMinutes(hm, mins){ let [h,m] = hm.split(':').map(Number); let t = Math.min(h*60 + m + mins, 23*60+59); return pad(Math.floor(t/60)) + ':' + pad(t%60); }
-function eventTitle(e){
-  const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
-  return pre + e.title;
-}
-function buildIcs(list){
-  const now = new Date();
-  const stamp = now.getUTCFullYear() + pad(now.getUTCMonth()+1) + pad(now.getUTCDate()) + 'T' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds()) + 'Z';
-  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mi agenda//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
-  list.forEach(e => {
-    L.push('BEGIN:VEVENT', `UID:${e.id}@mi-agenda`, `DTSTAMP:${stamp}`, `SUMMARY:${icsEscape(eventTitle(e))}`);
-    if(e.allDay){
-      L.push(`DTSTART;VALUE=DATE:${icsDate(e.date)}`, `DTEND;VALUE=DATE:${icsDate(addDays(e.endDate || e.date, 1))}`);
-    } else {
-      const end = e.end && e.end > e.start ? e.end : plusMinutes(e.start, 60);
-      L.push(`DTSTART:${icsDateTime(e.date, e.start)}`, `DTEND:${icsDateTime(e.date, end)}`);
-    }
-    L.push('DESCRIPTION:Creado en Mi agenda', 'END:VEVENT');
-  });
-  L.push('END:VCALENDAR');
-  return L.join('\r\n') + '\r\n';
-}
-function sendToCalendar(evOrList){
-  const list = Array.isArray(evOrList) ? evOrList : [evOrList];
-  const blob = new Blob([buildIcs(list)], {type:'text/calendar;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if(ios){
-    window.location.href = url;   // iOS abre la vista de evento con “Agregar”
-  } else {
-    const a = document.createElement('a'); a.href = url;
-    a.download = list.length === 1 ? `${list[0].title.replace(/[^\p{L}\p{N} ]/gu,'').trim() || 'evento'}.ics` : 'mi-agenda.ics';
-    document.body.appendChild(a); a.click(); a.remove();
-  }
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-}
 async function backup(){
   const name = `mi-agenda-${todayIso()}.json`;
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
