@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Mi agenda</title>
 <meta name="theme-color" content="#AFC4DA">
 <link rel="manifest" href="manifest.webmanifest">
@@ -30,7 +30,8 @@
 *,*::before,*::after{box-sizing:border-box}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--page)}
 body{margin:0;height:100%;background:var(--page);font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 svg{display:block;flex-shrink:0}
 
 /* ---------- Pieles ---------- */
@@ -73,7 +74,7 @@ svg{display:block;flex-shrink:0}
 .wk,.grid{display:grid;grid-template-columns:repeat(7,1fr);justify-items:center}
 .wk{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:8px}
 .grid{row-gap:14px}
-.day{position:relative;width:38px;height:38px;border-radius:50%;border:0;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;transition:background .15s,color .15s}
+.day{position:relative;width:clamp(36px,10.4vw,44px);height:clamp(36px,10.4vw,44px);border-radius:50%;border:0;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;transition:background .15s,color .15s}
 .day.out{background:transparent;color:var(--ink-faint);font-weight:700}
 .day.today{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface)}
 .day.sel{background:var(--accent);color:var(--accent-ink);box-shadow:none}
@@ -160,7 +161,9 @@ svg{display:block;flex-shrink:0}
 .addrow input{flex:1;min-width:0}
 .addrow button{width:42px;height:46px;flex-shrink:0;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center}
 
-input[type=text],input[type=date],input[type=time]{width:100%;border:0;background:var(--surface-2);color:var(--ink);border-radius:16px;padding:13px 14px;font:inherit;font-weight:700;font-size:15px;min-height:46px;color-scheme:light}
+input[type=text],input[type=date],input[type=time]{width:100%;border:0;background:var(--surface-2);color:var(--ink);border-radius:16px;padding:13px 14px;font:inherit;font-weight:700;font-size:16px;min-height:46px;color-scheme:light;-webkit-appearance:none;appearance:none}
+input[type=date]{display:flex;align-items:center}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
 input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 
 /* Cajón lateral */
