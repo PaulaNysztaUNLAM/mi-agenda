@@ -111,6 +111,13 @@ svg{display:block;flex-shrink:0}
 .flag{border:0;background:transparent;color:var(--ink-faint);width:30px;height:30px;display:grid;place-items:center;border-radius:50%;padding:0}
 .flag.on{color:var(--urgent)}
 .addrow .addflag{background:var(--surface-2);color:var(--ink-soft)}
+.addrow .addrep{background:var(--surface-2);color:var(--ink-soft)}
+.addrow .addrep.on{background:var(--accent);color:var(--accent-ink)}
+#addReps .reps{margin:8px 0 0}
+.todo .rep{display:inline-flex;vertical-align:-2px;margin-left:6px;color:var(--ink-soft)}
+.tconfirm{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 4px 12px 40px;font-size:13px;font-weight:700;color:var(--ink-soft)}
+.tconfirm button{height:34px;padding:0 12px;border-radius:17px;border:0;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:13px}
+.tconfirm button.danger{color:var(--urgent)}
 .addrow .addflag.on{background:var(--urgent);color:var(--urgent-ink)}
 .addhint{font-size:12px;color:var(--ink-soft);margin:8px 6px 0;line-height:1.45}
 .magic{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -150,7 +157,7 @@ svg{display:block;flex-shrink:0}
 .todo .x{border:0;background:transparent;color:var(--ink-faint);width:30px;height:30px;display:grid;place-items:center;border-radius:50%}
 .addrow{display:flex;gap:8px;margin-top:10px}
 .addrow input{flex:1;min-width:0}
-.addrow button{width:46px;height:46px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center}
+.addrow button{width:42px;height:46px;flex-shrink:0;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center}
 
 input[type=text],input[type=date],input[type=time]{width:100%;border:0;background:var(--surface-2);color:var(--ink);border-radius:16px;padding:13px 14px;font:inherit;font-weight:700;font-size:15px;min-height:46px;color-scheme:light}
 input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
@@ -290,10 +297,12 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
           <div class="todohead"><h2>Pendientes</h2><span id="todoCount"></span></div>
           <div id="todolist"></div>
           <div class="addrow">
-            <input type="text" id="todoInput" placeholder="Agregar una tarea a este día" maxlength="80">
+            <input type="text" id="todoInput" placeholder="Nueva tarea" maxlength="80">
             <button class="addflag" data-act="add-flag" id="addFlag" aria-pressed="false" aria-label="Marcar como urgente"></button>
+            <button class="addrep" data-act="add-rep" id="addRep" aria-expanded="false" aria-label="Repetir tarea"></button>
             <button data-act="todo-add" aria-label="Agregar tarea"></button>
           </div>
+          <div id="addReps"></div>
           <p class="addhint" id="addHint"></p>
         </section>
       </main>
@@ -430,6 +439,7 @@ function seed(){
       {id:uid(), type:'viaje', title:'Córdoba', date:addDays(t,19), endDate:addDays(t,21), allDay:true},
       {id:uid(), type:'c_cumple', title:'Cumple de Sofi', date:addDays(t,12), allDay:true}
     ],
+    rtodos:[],
     todos:{
       [t]:[{id:uid(), text:'Pagar factura de luz', done:false, urgent:true},{id:uid(), text:'Comprar apuntes', done:false},{id:uid(), text:'Pagar la cuota del gimnasio', done:true, urgent:true}],
       [addDays(t,1)]:[{id:uid(), text:'Avanzar TP de Sistemas Operativos', done:false}],
@@ -456,6 +466,7 @@ let form = null;          // estado de la hoja de evento
 let openIcon = null;      // tipo cuyo selector de ícono está abierto
 let openColor = null;     // tipo cuyo selector de color está abierto
 let openMagic = null, addUrgent = false;
+let addRepeat = '', showAddRep = false, confirmTodoDel = null;
 let undoFn = null, toastT = null, resetArmed = false;
 
 const $ = id => document.getElementById(id);
@@ -494,8 +505,18 @@ function autoTodos(s){
     .sort((a,b) => a.n - b.n)
     .map(x => { const key = x.e.id+'|'+s; return {key, text:`Estudiar ${x.e.title} (${x.n})`, done:!!state.autoDone[key], auto:true}; });
 }
-function todosOn(s){ return [...autoTodos(s), ...(state.todos[s]||[])]; }
-function dayUrgent(s){ return (state.todos[s]||[]).some(t => t.urgent && !t.done); }
+function rtodosOn(s){
+  return (state.rtodos || []).filter(r => startsOn(r, s))
+    .map(r => ({id:r.id, text:r.text, urgent:!!r.urgent, done:!!(r.done && r.done[s]), rep:r.repeat}));
+}
+function todosOn(s){ return [...autoTodos(s), ...rtodosOn(s), ...(state.todos[s]||[])]; }
+/* las repetidas urgentes solo pintan de rojo hasta hoy, no todo el futuro */
+function urgentCount(s){
+  const own = (state.todos[s]||[]).filter(t => t.urgent && !t.done).length;
+  const rep = s <= todayIso() ? rtodosOn(s).filter(t => t.urgent && !t.done).length : 0;
+  return own + rep;
+}
+function dayUrgent(s){ return urgentCount(s) > 0; }
 function wordRe(w){
   const e = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp('(^|[^\\p{L}\\p{N}])' + e + '($|[^\\p{L}\\p{N}])', 'iu');
@@ -553,7 +574,7 @@ function renderDay(){
   const d = parse(sel);
   const evs = eventsOn(sel);
   const pend = todosOn(sel).filter(x => !x.done).length;
-  const urg = (state.todos[sel]||[]).filter(t => t.urgent && !t.done).length;
+  const urg = urgentCount(sel);
   const wd = sel === todayIso() ? 'Hoy, '+fmtWd.format(d) : fmtWd.format(d);
   $('dayhead').innerHTML = `<div class="num">${pad(d.getDate())}</div><div><div class="wd">${wd}</div><div class="count">${evs.length} evento${evs.length===1?'':'s'} y ${pend} tarea${pend===1?'':'s'} pendiente${pend===1?'':'s'}</div>${urg ? `<div class="count" style="color:var(--urgent);font-weight:800">${urg} urgente${urg===1?'':'s'} sin completar</div>` : ''}</div>`;
   $('evlist').innerHTML = evs.length ? evs.map(e => {
@@ -579,13 +600,14 @@ function renderTodos(){
   const done = list.filter(x => x.done).length;
   $('todoCount').textContent = list.length ? `${done} de ${list.length} hechas` : '';
   $('todolist').innerHTML = list.length ? list.map(x => {
-    const ref = x.auto ? `data-key="${x.key}"` : `data-id="${x.id}"`;
+    const ref = x.auto ? `data-key="${x.key}"` : x.rep ? `data-rid="${x.id}"` : `data-id="${x.id}"`;
     const emo = markerFor(x.text, x.auto);
+    const repTxt = {day:'Se repite todos los días', week:'Se repite cada semana', month:'Se repite cada mes'}[x.rep];
     return `<div class="todo${x.done?' done':''}${x.urgent?' urgent':''}">
       <button class="chk" data-act="todo-toggle" ${ref} role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done?ico('check',14,3):''}</button>
-      <span class="txt">${emo?`<span class="emo" aria-hidden="true">${ico(emo,17)}</span>`:''}${esc(x.text)}</span>
-      ${x.auto?'':`<button class="flag${x.urgent?' on':''}" data-act="todo-flag" data-id="${x.id}" aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',16)}</button><button class="x" data-act="todo-del" data-id="${x.id}" aria-label="Borrar tarea">${ico('x',16)}</button>`}
-    </div>`;
+      <span class="txt">${emo?`<span class="emo" aria-hidden="true">${ico(emo,17)}</span>`:''}${esc(x.text)}${x.rep?`<span class="rep" title="${repTxt}" aria-label="${repTxt}">${ico('repeat',13)}</span>`:''}</span>
+      ${x.auto?'':`<button class="flag${x.urgent?' on':''}" data-act="todo-flag" ${ref} aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',16)}</button><button class="x" data-act="todo-del" ${ref} aria-label="Borrar tarea">${ico('x',16)}</button>`}
+    </div>${x.rep && confirmTodoDel === x.id ? `<div class="tconfirm">Borrar: <button data-act="rtodo-skip" data-rid="${x.id}">Solo este día</button><button class="danger" data-act="rtodo-delall" data-rid="${x.id}">Todos los días</button><button data-act="rtodo-cancel">Cancelar</button></div>` : ''}`;
   }).join('') : `<p class="empty">Nada pendiente para este día.</p>`;
 }
 
@@ -828,10 +850,24 @@ function goMonth(delta){
 function addTodo(){
   const i = $('todoInput'); const t = i.value.trim(); if(!t) return;
   const urgent = addUrgent || isUrgentText(t);
-  (state.todos[sel] = state.todos[sel] || []).push({id:uid(), text:t, done:false, urgent});
-  i.value = ''; addUrgent = false; syncAddFlag(); save(); renderCalendar(); renderTodos(); renderDay();
-  if(urgent) toast('Tarea urgente: el día queda en rojo hasta completarla.');
+  const repeat = addRepeat;
+  if(repeat){
+    state.rtodos = state.rtodos || [];
+    state.rtodos.push({id:uid(), text:t, urgent, date:sel, repeat, done:{}, skip:[]});
+  } else {
+    (state.todos[sel] = state.todos[sel] || []).push({id:uid(), text:t, done:false, urgent});
+  }
+  i.value = ''; addUrgent = false; addRepeat = ''; showAddRep = false;
+  syncAddFlag(); renderAddRep(); save(); renderCalendar(); renderTodos(); renderDay();
+  if(repeat) toast({day:'Pendiente agregado: se repite todos los días.', week:'Pendiente agregado: se repite cada semana.', month:'Pendiente agregado: se repite cada mes.'}[repeat]);
+  else if(urgent) toast('Tarea urgente: el día queda en rojo hasta completarla.');
 }
+function renderAddRep(){
+  const b = $('addRep');
+  b.classList.toggle('on', !!addRepeat); b.setAttribute('aria-expanded', showAddRep);
+  $('addReps').innerHTML = showAddRep ? `<div class="reps" role="radiogroup" aria-label="Repetir tarea">${[['','No'],['day','Diario'],['week','Semanal'],['month','Mensual']].map(([v,l]) => `<button class="${addRepeat===v?'on':''}" role="radio" aria-checked="${addRepeat===v}" data-act="add-rep-pick" data-val="${v}">${l}</button>`).join('')}</div>` : '';
+}
+function findR(id){ return (state.rtodos || []).find(r => r.id === id); }
 function syncAddFlag(){
   const on = addUrgent || isUrgentText($('todoInput').value);
   const b = $('addFlag'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
@@ -867,12 +903,30 @@ document.addEventListener('click', e => {
     case 'undo': if(undoFn){ undoFn(); undoFn = null; } $('toast').classList.remove('on'); break;
     case 'todo-toggle': {
       if(b.dataset.key){ const k = b.dataset.key; if(state.autoDone[k]) delete state.autoDone[k]; else state.autoDone[k] = true; }
+      else if(b.dataset.rid){ const r = findR(b.dataset.rid); if(r){ r.done = r.done || {}; if(r.done[sel]) delete r.done[sel]; else r.done[sel] = true; } }
       else { const t = (state.todos[sel]||[]).find(x => x.id === b.dataset.id); if(t) t.done = !t.done; }
       save(); renderCalendar(); renderTodos(); renderDay(); break;
     }
-    case 'todo-del': state.todos[sel] = (state.todos[sel]||[]).filter(x => x.id !== b.dataset.id); save(); renderCalendar(); renderTodos(); renderDay(); break;
-    case 'todo-flag': { const t = (state.todos[sel]||[]).find(x => x.id === b.dataset.id); if(t) t.urgent = !t.urgent; save(); renderCalendar(); renderTodos(); renderDay(); break; }
+    case 'todo-del':
+      if(b.dataset.rid){ confirmTodoDel = confirmTodoDel === b.dataset.rid ? null : b.dataset.rid; renderTodos(); break; }
+      state.todos[sel] = (state.todos[sel]||[]).filter(x => x.id !== b.dataset.id); save(); renderCalendar(); renderTodos(); renderDay(); break;
+    case 'todo-flag': { const t = b.dataset.rid ? findR(b.dataset.rid) : (state.todos[sel]||[]).find(x => x.id === b.dataset.id); if(t) t.urgent = !t.urgent; save(); renderCalendar(); renderTodos(); renderDay(); break; }
     case 'add-flag': addUrgent = !addUrgent; syncAddFlag(); break;
+    case 'add-rep': showAddRep = !showAddRep; renderAddRep(); break;
+    case 'add-rep-pick': addRepeat = b.dataset.val; showAddRep = false; renderAddRep(); $('todoInput').focus(); break;
+    case 'rtodo-cancel': confirmTodoDel = null; renderTodos(); break;
+    case 'rtodo-skip': {
+      const r = findR(b.dataset.rid), day = sel; confirmTodoDel = null; if(!r) break;
+      r.skip = [...(r.skip || []), day]; save(); renderCalendar(); renderTodos(); renderDay();
+      toast('Se borró solo de este día.', () => { r.skip = r.skip.filter(x => x !== day); save(); renderCalendar(); renderTodos(); renderDay(); });
+      break;
+    }
+    case 'rtodo-delall': {
+      const r = findR(b.dataset.rid); confirmTodoDel = null; if(!r) break;
+      state.rtodos = state.rtodos.filter(x => x.id !== r.id); save(); renderCalendar(); renderTodos(); renderDay();
+      toast('Pendiente borrado de todos los días.', () => { state.rtodos.push(r); save(); renderCalendar(); renderTodos(); renderDay(); });
+      break;
+    }
     case 'ctype-add': {
       const id = 'c_' + uid();
       state.customTypes = state.customTypes || [];
@@ -1080,7 +1134,8 @@ document.querySelector('[data-act="next"]').innerHTML = ico('right',18,2.4);
 document.querySelector('.fab').innerHTML = ico('plus',26,2.4);
 document.querySelector('[data-act="todo-add"]').innerHTML = ico('plus',20,2.4);
 $('addFlag').innerHTML = ico('flag',18);
-$('addHint').textContent = 'Las tareas con palabras mágicas (como “Estudiar” o “TP”) llevan su ícono solas. Tocá el banderín para marcar una tarea como urgente.';
+$('addRep').innerHTML = ico('repeat',18);
+$('addHint').textContent = 'Las tareas con palabras mágicas (como “Estudiar” o “TP”) llevan su ícono solas. Tocá el banderín para marcarla urgente y las flechitas para que se repita.';
 $('pillIcon').innerHTML = ico('cal',17);
 (function tick(){ const d = new Date(); $('clock').textContent = `${d.getHours()}:${pad(d.getMinutes())}`; setTimeout(tick, 30000); })();
 
