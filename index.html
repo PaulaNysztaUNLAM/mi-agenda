@@ -84,7 +84,7 @@ svg{display:block;flex-shrink:0}
 .badges.multi .badge:first-child{margin-left:0}
 .day.out .badges{opacity:.55}
 .badges.more::after{content:"";position:absolute;top:-1px;right:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent);border:1.5px solid var(--surface)}
-.day.tinted.out{opacity:.5}
+.day.tinted.out,.day.urgent.out{opacity:.5}
 .day.tinted.sel{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px var(--accent)}
 .day.tinted.today{box-shadow:inset 0 0 0 2px var(--ink)}
 .day.tinted.today.sel{box-shadow:inset 0 0 0 2px var(--ink),0 0 0 2.5px var(--surface),0 0 0 4.5px var(--accent)}
@@ -103,7 +103,8 @@ svg{display:block;flex-shrink:0}
 /* Urgentes y emojis */
 .day.urgent{background:var(--urgent);color:var(--urgent-ink)}
 .day.urgent.today{box-shadow:inset 0 0 0 2px var(--urgent-ink),0 0 0 2px var(--urgent)}
-.day.urgent.sel{background:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px var(--urgent)}
+.day.urgent.sel{background:var(--urgent);color:var(--urgent-ink);box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px var(--accent)}
+.day.urgent.today.sel{box-shadow:inset 0 0 0 2px var(--urgent-ink),0 0 0 2.5px var(--surface),0 0 0 4.5px var(--accent)}
 .todo .emo{display:inline-flex;vertical-align:-3px;margin-right:7px;color:var(--ink)}
 .todo.done .emo{color:var(--ink-soft)}
 .todo.urgent .txt{color:var(--urgent)}
@@ -510,10 +511,12 @@ function rtodosOn(s){
     .map(r => ({id:r.id, text:r.text, urgent:!!r.urgent, done:!!(r.done && r.done[s]), rep:r.repeat}));
 }
 function todosOn(s){ return [...autoTodos(s), ...rtodosOn(s), ...(state.todos[s]||[])]; }
-/* las repetidas urgentes solo pintan de rojo hasta hoy, no todo el futuro */
+/* urgente siempre gana al color del evento.
+   Repetidas urgentes: semanales y mensuales se pintan en todas sus fechas;
+   las diarias solo hasta hoy, para no llenar el mes de rojo. */
 function urgentCount(s){
   const own = (state.todos[s]||[]).filter(t => t.urgent && !t.done).length;
-  const rep = s <= todayIso() ? rtodosOn(s).filter(t => t.urgent && !t.done).length : 0;
+  const rep = rtodosOn(s).filter(t => t.urgent && !t.done && (t.rep !== 'day' || s <= todayIso())).length;
   return own + rep;
 }
 function dayUrgent(s){ return urgentCount(s) > 0; }
@@ -909,7 +912,12 @@ document.addEventListener('click', e => {
     }
     case 'todo-del':
       if(b.dataset.rid){ confirmTodoDel = confirmTodoDel === b.dataset.rid ? null : b.dataset.rid; renderTodos(); break; }
-      state.todos[sel] = (state.todos[sel]||[]).filter(x => x.id !== b.dataset.id); save(); renderCalendar(); renderTodos(); renderDay(); break;
+      {
+        const day = sel, list = state.todos[day] || [], idx = list.findIndex(x => x.id === b.dataset.id); if(idx < 0) break;
+        const [gone] = list.splice(idx, 1); save(); renderCalendar(); renderTodos(); renderDay();
+        toast('Tarea borrada.', () => { (state.todos[day] = state.todos[day] || []).splice(idx, 0, gone); save(); renderCalendar(); renderTodos(); renderDay(); });
+      }
+      break;
     case 'todo-flag': { const t = b.dataset.rid ? findR(b.dataset.rid) : (state.todos[sel]||[]).find(x => x.id === b.dataset.id); if(t) t.urgent = !t.urgent; save(); renderCalendar(); renderTodos(); renderDay(); break; }
     case 'add-flag': addUrgent = !addUrgent; syncAddFlag(); break;
     case 'add-rep': showAddRep = !showAddRep; renderAddRep(); break;
