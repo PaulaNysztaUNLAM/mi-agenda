@@ -1,13 +1,9 @@
 # Mi agenda
 
-App de calendario, eventos y pendientes para el celular.
-Es un sitio estático: no necesita instalar nada ni compilar.
+Calendario, eventos y pendientes para celular y computadora.
 
-Archivos:
 - index.html: la app completa
-- manifest.webmanifest: nombre, colores e ícono para instalarla
+- config.js: los datos de Supabase para sincronizar (si están vacíos, no sincroniza)
 - sw.js: hace que abra rápido y funcione sin internet
-- icon-192.png, icon-512.png, apple-touch-icon.png: íconos
-
-Los datos se guardan en el celular (localStorage).
-Desde Configuración > Copia de seguridad podés descargarlos y volver a cargarlos.
+- manifest.webmanifest e íconos: para instalarla como app
+- supabase.sql: crea la tabla en Supabase (se pega una sola vez en el SQL Editor)

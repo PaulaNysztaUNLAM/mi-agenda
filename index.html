@@ -6,6 +6,7 @@
 <title>Mi agenda</title>
 <meta name="theme-color" content="#AFC4DA">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="config.js"></script>
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -161,7 +162,7 @@ svg{display:block;flex-shrink:0}
 .addrow input{flex:1;min-width:0}
 .addrow button{width:42px;height:46px;flex-shrink:0;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center}
 
-input[type=text],input[type=date],input[type=time]{width:100%;border:0;background:var(--surface-2);color:var(--ink);border-radius:16px;padding:13px 14px;font:inherit;font-weight:700;font-size:16px;min-height:46px;color-scheme:light;-webkit-appearance:none;appearance:none}
+input[type=text],input[type=date],input[type=time],input[type=email],input[type=password]{width:100%;border:0;background:var(--surface-2);color:var(--ink);border-radius:16px;padding:13px 14px;font:inherit;font-weight:700;font-size:16px;min-height:46px;color-scheme:light;-webkit-appearance:none;appearance:none}
 input[type=date]{display:flex;align-items:center}
 input[type=date]::-webkit-date-and-time-value{text-align:left}
 input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
@@ -261,6 +262,81 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 :focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
 .day.sel:focus-visible{outline-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* ===== Computadora (1024px o más). El celular no cambia. ===== */
+.deskonly,.wkblock,#week{display:none}
+.desk,.desk body{background:var(--app-bg)}
+.desk .stage{padding:0;min-height:0;height:100%;display:block}
+.desk .phone{width:100%;height:100vh;border:0;border-radius:0;box-shadow:none}
+.desk .caption,.desk .statusbar,.desk [data-act="menu"],.desk #riddle{display:none !important}
+.desk .app{display:grid;grid-template-columns:288px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+.desk .drawer{position:relative;grid-column:1;grid-row:1 / span 2;transform:none;width:auto;max-width:none;border-radius:0;background:transparent;padding:20px 4px 24px 20px;z-index:1;transition:none;gap:4px}
+.desk .drawer .brand{padding:0 12px 10px}
+.desk .navitem{padding:11px 14px;font-size:15px}
+.desk .navitem.on{background:var(--surface)}
+.desk .overlay{z-index:20}
+.desk .topbar{grid-column:2;grid-row:1;padding:20px 24px 10px;gap:8px}
+.desk .topbar h1{text-align:left;font-size:22px}
+.desk .deskonly{display:grid}
+.desk .calonly[hidden]{display:none}
+.desk .wkblock{display:block}
+.desk .scroll{grid-column:2;grid-row:2;padding:4px 24px 24px}
+.desk #view-cal > .block{display:none}
+.desk #view-set{max-width:760px;width:100%;margin:0 auto;box-sizing:border-box}
+.desk #calBlock{display:block;margin-top:12px;padding:14px}
+.desk #calBlock .cal-top{margin-bottom:8px}
+.desk #calBlock .monthpill{font-size:13px;padding:6px 12px}
+.desk #calBlock .chev{width:30px;height:30px}
+.desk #calBlock .wk{font-size:11px}
+.desk #calBlock .grid{row-gap:8px}
+.desk #calBlock .day{width:30px;height:30px;font-size:12px}
+.desk #calBlock .badges{transform:scale(.8);transform-origin:top right}
+.desk #calBlock .badges.multi{transform:translateX(-50%) scale(.8);transform-origin:top center}
+.desk #calBlock .day.inweek:not(.sel):not(.tinted):not(.urgent){background:var(--line)}
+.topadd{height:42px;padding:0 16px 0 12px;border-radius:21px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:14px;align-items:center;gap:6px;grid-auto-flow:column}
+.wkblock{background:var(--surface);border-radius:28px;padding:14px;margin-top:12px}
+.wkblock h2{font-size:14px;font-weight:800;margin:2px 4px 6px}
+.desk #week{display:grid;grid-template-columns:repeat(7,minmax(128px,1fr));gap:10px;min-height:calc(100% - 4px);align-items:stretch}
+.wcol{background:var(--surface);border-radius:22px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.wcol.today{box-shadow:0 0 0 2.5px var(--ink)}
+.whead{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;padding:10px 12px;background:var(--surface-2);color:var(--ink)}
+.whead .wn{font-weight:800;font-size:13px;text-transform:capitalize}
+.whead .wm{font-size:11px;font-weight:700;opacity:.8}
+.whead .wnum{font-family:"Big Shoulders Display","Arial Narrow",sans-serif;font-weight:800;font-size:32px;line-height:.85}
+.wsec{padding:8px 8px 4px;display:flex;flex-direction:column;gap:5px}
+.wlbl{font-size:11px;font-weight:800;color:var(--ink-soft);margin:0 4px 1px}
+.wev{display:flex;gap:6px;align-items:flex-start;width:100%;border:0;border-radius:12px;padding:6px 8px;background:var(--surface-2);text-align:left;color:var(--ink)}
+.wev svg{margin-top:1px}
+.wev .t{display:block;font-size:10.5px;font-weight:800;opacity:.8;font-variant-numeric:tabular-nums}
+.wev .n{display:block;font-weight:800;font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+.wempty{font-size:12px;color:var(--ink-soft);font-weight:700;margin:2px 4px}
+.wadd{border:0;background:transparent;color:var(--ink-soft);font-weight:800;font-size:12px;display:flex;align-items:center;gap:4px;padding:4px;align-self:flex-start;border-radius:8px}
+.wadd:hover{color:var(--ink)}
+.wtodos{padding:4px 8px 10px;display:flex;flex-direction:column;flex:1;border-top:1.5px dashed var(--line);margin-top:6px}
+.wtodo{display:flex;gap:6px;align-items:flex-start;padding:4px 2px;position:relative}
+.wtodo .chk{width:16px;height:16px;border-width:1.5px;margin-top:1px}
+.wtodo .txt{flex:1;font-size:12px;font-weight:700;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.wtodo .emo{display:inline-flex;vertical-align:-2px;margin-right:4px;color:var(--ink)}
+.wtodo .rep{display:inline-flex;vertical-align:-2px;margin-left:4px;color:var(--ink-soft)}
+.wtodo.done .txt{text-decoration:line-through;color:var(--ink-soft);font-weight:500}
+.wtodo.urgent .txt{color:var(--urgent)}
+.wtodo.urgent.done .txt{color:var(--ink-soft)}
+.wtodo .acts{position:absolute;right:0;top:1px;display:flex;background:var(--surface);border-radius:8px;box-shadow:-6px 0 6px var(--surface);opacity:0;pointer-events:none;transition:opacity .15s}
+.wtodo:hover .acts,.wtodo:focus-within .acts{opacity:1;pointer-events:auto}
+.wtodo .acts button{width:22px;height:22px;border:0;background:transparent;color:var(--ink-faint);display:grid;place-items:center;padding:0;border-radius:6px}
+.wtodo .acts button.on{color:var(--urgent)}
+.wtodo .acts button:hover{color:var(--ink)}
+.wtodos .tconfirm{padding:0 0 6px 22px;font-size:11px}
+.wtodos .tconfirm button{height:26px;padding:0 8px;font-size:11px}
+#week input.winput,.wkblock input.winput{width:100%;box-sizing:border-box;border:0;background:var(--surface-2);border-radius:10px;padding:7px 9px;font:inherit;font-size:12px;font-weight:700;color:var(--ink);min-height:0;margin-top:auto}
+.desk .sheet{left:50%;right:auto;bottom:auto;top:50%;width:520px;max-height:88vh;border-radius:28px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s}
+.desk .sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
+.desk .sheet .grab{display:none}
+.wev .st{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:var(--ink-soft);margin-top:2px}
+.wev .st i{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sheet .reps.status button{font-size:12px}
+.desk .swatches{grid-template-columns:repeat(3,150px)}
+.desk .toast{left:auto;right:24px;width:360px}
 </style>
 </head>
 <body>
@@ -275,10 +351,14 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
       <header class="topbar">
         <button class="iconbtn" data-act="menu" aria-label="Abrir menú"></button>
         <h1 id="title">Calendario</h1>
+        <button class="iconbtn deskonly calonly" data-act="wprev" aria-label="Semana anterior" id="wPrev"></button>
+        <button class="iconbtn deskonly calonly" data-act="wnext" aria-label="Semana siguiente" id="wNext"></button>
         <button class="todaybtn" data-act="today" id="todayBtn">Hoy</button>
+        <button class="topadd deskonly calonly" data-act="add" id="topAdd"></button>
       </header>
 
       <main class="scroll" id="view-cal">
+        <div id="week" aria-label="Semana"></div>
         <section class="block" id="calBlock">
           <div class="cal-top">
             <div class="monthpill"><span id="pillIcon"></span><span id="monthLabel"></span></div>
@@ -319,6 +399,7 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
         <button class="navitem" data-act="nav" data-route="cal"></button>
         <button class="navitem" data-act="nav" data-route="set"></button>
         <section class="riddle" id="riddle" aria-live="polite"></section>
+        <section class="wkblock" id="wkBlock" aria-label="Pendientes de la semana"></section>
       </nav>
 
       <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></div>
@@ -460,7 +541,7 @@ function load(){
   }catch(e){}
   return emptyState();
 }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} if(window.miCloud) window.miCloud.changed(); }
 
 let state = load();
 let sel = todayIso();
@@ -568,7 +649,7 @@ function renderCalendar(){
     const tintType = urgent ? null : order.find(tp => state.colors && state.colors[tp] && evs.some(e => e.type === tp));
     const tint = tintType ? state.colors[tintType] : '';
     const style = tint ? ` style="background:${tint};color:${inkFor(tint)}"` : '';
-    const cls = ['day', out&&'out', s===t&&'today', s===sel&&'sel', urgent&&'urgent', tint&&'tinted'].filter(Boolean).join(' ');
+    const cls = ['day', out&&'out', s===t&&'today', s===sel&&'sel', urgent&&'urgent', tint&&'tinted', isDesk() && weekStart(s)===weekStart(sel) && 'inweek'].filter(Boolean).join(' ');
     const label = `${d.getDate()} de ${fmtMonth.format(d)}${evs.length?`, ${evs.length} evento${evs.length>1?'s':''}`:''}`;
     html += `<button class="${cls}" data-act="day" data-date="${s}" aria-label="${label}"${style} ${s===sel?'aria-current="date"':''}>${d.getDate()}${badge}</button>`;
   }
@@ -599,6 +680,7 @@ function renderDay(){
       <button class="del" data-act="del" data-id="${e.id}" data-occ="${e._occ}" aria-label="${e.repeat ? 'Eliminar solo este día de ' : 'Eliminar '}${esc(e.title)}">${ico('trash',17)}</button>
     </div>`;
   }).join('') : `<p class="empty">No tenés eventos este día. Tocá + para agregar uno.</p>`;
+  renderWeek();
 }
 
 function renderTodos(){
@@ -615,6 +697,7 @@ function renderTodos(){
       ${x.auto?'':`<button class="flag${x.urgent?' on':''}" data-act="todo-flag" ${ref} aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',16)}</button><button class="x" data-act="todo-del" ${ref} aria-label="Borrar tarea">${ico('x',16)}</button>`}
     </div>${x.rep && confirmTodoDel === x.id ? `<div class="tconfirm">Borrar: <button data-act="rtodo-skip" data-rid="${x.id}">Solo este día</button><button class="danger" data-act="rtodo-delall" data-rid="${x.id}">Todos los días</button><button data-act="rtodo-cancel">Cancelar</button></div>` : ''}`;
   }).join('') : `<p class="empty">Nada pendiente para este día.</p>`;
+  renderWeek();
 }
 
 function renderSettings(){
@@ -683,9 +766,10 @@ function renderSettings(){
       <p class="sub">Si una tarea nueva tiene alguna de estas palabras se marca como urgente, y el círculo del día queda en rojo hasta que la completes. Separalas con comas.</p>
       <input type="text" id="urgentInput" maxlength="120" value="${esc(state.urgentWords)}" placeholder="Ej: pagar, factura, vence">
     </section>
+    ${syncSection()}
     <section class="block set">
       <h2>Copia de seguridad</h2>
-      <p class="sub">Tus datos viven solo en este celular. Descargá una copia de vez en cuando y guardala en Drive, WhatsApp o Archivos.</p>
+      <p class="sub">Tus datos se guardan en este dispositivo. Descargá una copia de vez en cuando y guardala en Drive, WhatsApp o Archivos.</p>
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="btn primary" data-act="backup">Descargar copia</button>
         <button class="btn ghost" data-act="restore">Cargar una copia</button>
@@ -710,9 +794,100 @@ function renderNav(){
   });
   $('view-cal').hidden = route !== 'cal';
   $('view-set').hidden = route !== 'set';
-  $('title').textContent = route === 'cal' ? 'Calendario' : 'Configuración';
+  $('title').textContent = route === 'cal' ? (isDesk() ? weekTitle() : 'Calendario') : 'Configuración';
   $('todayBtn').hidden = route !== 'cal';
+  document.querySelectorAll('.calonly').forEach(x => x.hidden = route !== 'cal');
 }
+
+/* ---------- Vista de computadora: semana ---------- */
+const deskMQ = window.matchMedia('(min-width: 1024px)');
+const isDesk = () => deskMQ.matches;
+function eventTitle(e){
+  const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
+  return pre + e.title;
+}
+function weekStart(s){ const d = parse(s); return addDays(s, -((d.getDay() + 6) % 7)); }
+function weekTitle(){
+  const a = weekStart(sel), b = addDays(a, 6), da = parse(a), db = parse(b);
+  return da.getMonth() === db.getMonth()
+    ? `Semana del ${da.getDate()} al ${db.getDate()} de ${fmtMonth.format(db)}`
+    : `Semana del ${da.getDate()} de ${fmtMonth.format(da)} al ${db.getDate()} de ${fmtMonth.format(db)}`;
+}
+function dayTint(s){
+  if(dayUrgent(s)) return {bg:'var(--urgent)', ink:'var(--urgent-ink)'};
+  const evs = eventsOn(s);
+  const tp = typeOrder().find(x => state.colors && state.colors[x] && evs.some(e => e.type === x));
+  return tp ? {bg:state.colors[tp], ink:inkFor(state.colors[tp])} : null;
+}
+function renderWeek(){
+  if(!isDesk()) return;
+  const ws = weekStart(sel), t = todayIso();
+  if(route === 'cal') $('title').textContent = weekTitle();
+  $('week').innerHTML = [0,1,2,3,4,5,6].map(i => {
+    const s = addDays(ws, i), d = parse(s), tint = dayTint(s);
+    const evs = eventsOn(s);
+    const evHtml = evs.length ? evs.map(e => {
+      let time;
+      if(e.allDay) time = 'Todo el día';
+      else if(crossesMidnight(e) && s > e._occ) time = `Hasta ${fmtT(e.end)}`;
+      else time = e.end ? `${fmtT(e.start)} – ${fmtT(e.end)}` : fmtT(e.start);
+      const c = state.colors && state.colors[e.type];
+      const icon = state.icons[e.type] === 'none' || !state.icons[e.type] ? 'dot' : state.icons[e.type];
+      return `<button class="wev" data-act="edit" data-id="${e.id}" data-occ="${e._occ}" data-wdate="${s}"${c ? ` style="background:${c}66"` : ''}>
+        ${ico(icon, 13)}<span style="min-width:0"><span class="t">${time}${e.repeat ? ' ↻' : ''}</span><span class="n">${esc(eventTitle(e))}</span>${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<span class="st">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',11,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</span>` : ''; })()}</span></button>`;
+    }).join('') : `<p class="wempty">Sin eventos</p>`;
+    const list = todosOn(s);
+    const tdHtml = list.map(x => {
+      const ref = x.auto ? `data-key="${x.key}"` : x.rep ? `data-rid="${x.id}"` : `data-id="${x.id}"`;
+      const emo = markerFor(x.text, x.auto);
+      return `<div class="wtodo${x.done?' done':''}${x.urgent?' urgent':''}">
+        <button class="chk" data-act="todo-toggle" ${ref} data-wdate="${s}" role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done ? ico('check',10,3.4) : ''}</button>
+        <span class="txt">${emo ? `<span class="emo" aria-hidden="true">${ico(emo,13)}</span>` : ''}${esc(x.text)}${x.rep ? `<span class="rep" aria-label="Se repite">${ico('repeat',11)}</span>` : ''}</span>
+        ${x.auto ? '' : `<span class="acts"><button class="${x.urgent?'on':''}" data-act="todo-flag" ${ref} data-wdate="${s}" aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',13)}</button><button data-act="todo-del" ${ref} data-wdate="${s}" aria-label="Borrar tarea">${ico('x',13)}</button></span>`}
+      </div>${x.rep && confirmTodoDel === x.id && s === sel ? `<div class="tconfirm"><button data-act="rtodo-skip" data-rid="${x.id}" data-wdate="${s}">Solo este día</button><button class="danger" data-act="rtodo-delall" data-rid="${x.id}" data-wdate="${s}">Todos</button><button data-act="rtodo-cancel">No</button></div>` : ''}`;
+    }).join('');
+    return `<section class="wcol${s===t?' today':''}" aria-label="${fmtWd.format(d)} ${d.getDate()}">
+      <div class="whead"${tint ? ` style="background:${tint.bg};color:${tint.ink}"` : ''}>
+        <div><div class="wn">${s===t ? 'Hoy, ' + fmtWd.format(d) : fmtWd.format(d)}</div><div class="wm">${fmtMonth.format(d)}</div></div>
+        <div class="wnum">${pad(d.getDate())}</div>
+      </div>
+      <div class="wsec"><span class="wlbl">Eventos</span>${evHtml}
+        <button class="wadd" data-act="add" data-wdate="${s}">${ico('plus',12,2.6)} Evento</button></div>
+      <div class="wtodos"><span class="wlbl" style="margin-top:6px">Pendientes</span>${tdHtml || '<p class="wempty">Nada pendiente</p>'}
+        <label class="sr" for="wi-${s}" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nueva tarea para el ${d.getDate()}</label>
+        <input class="winput" id="wi-${s}" data-wdate="${s}" type="text" placeholder="+ Nueva tarea" maxlength="80" autocomplete="off"></div>
+    </section>`;
+  }).join('');
+  renderWeekTodos(ws);
+}
+function renderWeekTodos(ws){
+  const list = (state.weekTodos && state.weekTodos[ws]) || [];
+  $('wkBlock').innerHTML = `<h2>Pendientes de la semana</h2>
+    ${list.length ? list.map(x => `<div class="wtodo${x.done?' done':''}">
+      <button class="chk" data-act="wk-toggle" data-id="${x.id}" role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done ? ico('check',10,3.4) : ''}</button>
+      <span class="txt">${esc(x.text)}</span>
+      <span class="acts"><button data-act="wk-del" data-id="${x.id}" aria-label="Borrar tarea">${ico('x',13)}</button></span>
+    </div>`).join('') : '<p class="wempty" style="margin:0 4px 8px">Cosas para hacer esta semana, sin día fijo.</p>'}
+    <label for="wkInput" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nueva tarea de la semana</label>
+    <input class="winput" id="wkInput" type="text" placeholder="+ Nueva tarea" maxlength="80" autocomplete="off" style="margin-top:8px">`;
+}
+function addTodoOn(day, text){
+  const urgent = isUrgentText(text);
+  (state.todos[day] = state.todos[day] || []).push({id:uid(), text, done:false, urgent});
+  save(); renderCalendar(); renderDay(); renderTodos();
+  const again = document.getElementById('wi-' + day); if(again) again.focus();
+  if(urgent) toast('Tarea urgente: el día queda en rojo hasta completarla.');
+}
+function applyLayout(){
+  const desk = isDesk();
+  document.documentElement.classList.toggle('desk', desk);
+  const cb = $('calBlock');
+  if(desk) $('drawer').insertBefore(cb, $('riddle'));
+  else $('view-cal').insertBefore(cb, $('week').nextSibling);
+  $('drawer').classList.remove('on'); $('overlay').classList.remove('on');
+  renderAll();
+}
+deskMQ.addEventListener ? deskMQ.addEventListener('change', applyLayout) : deskMQ.addListener(applyLayout);
 
 function renderAll(){
   applySkin(); renderCalendar(); renderDay(); renderTodos(); renderNav();
@@ -721,7 +896,7 @@ function renderAll(){
 
 /* ---------- Hoja de evento ---------- */
 function openSheet(ev, occ){
-  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:''};
+  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date, status:statusOf(ev, occ)} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:'', status:''};
   drawSheet(); $('sheet').classList.add('on'); $('overlay').classList.add('on');
   setTimeout(() => { const i = $('fTitle'); if(i && !ev) i.focus(); }, 320);
 }
@@ -730,7 +905,7 @@ function drawSheet(err=''){
   const n = state.studyDays;
   $('sheet').innerHTML = `
     <div class="grab"></div>
-    <h3 id="sheetTitle">${f.id ? 'Editar' : 'Nuevo'} ${T.label.toLowerCase()}</h3>
+    <h3 id="sheetTitle">${f.id ? 'Editar' : 'Nuevo'} ${T.label === 'TP' ? 'TP' : T.label.toLowerCase()}</h3>
     <div class="types" role="radiogroup" aria-label="Tipo">
       ${['evento','examen','tp','viaje', ...customIds()].map(tp => `<button class="chip${f.type===tp?' on':''}" role="radio" aria-checked="${f.type===tp}" data-act="ftype" data-val="${tp}">${ico(state.icons[tp]==='none'?'dot':state.icons[tp],16)}${esc(TYPES[tp].label)}</button>`).join('')}
     </div>
@@ -751,6 +926,10 @@ function drawSheet(err=''){
     </div>
     ${f.repeat ? `<label class="field"><span>Hasta (opcional)</span><input type="date" id="fUntil" value="${f.until||''}"></label>
     <p class="hint">${ico('repeat',18)}<span>${repeatHint(f)}</span></p>` : ''}
+    <div class="field"><span>Estado${f.repeat ? ' (de este día)' : ''}</span></div>
+    <div class="reps status" role="radiogroup" aria-label="Estado">
+      ${[['','Sin estado'],['pendiente','Pendiente'],['curso','En curso'],['finalizado','Finalizado']].map(([v,l]) => `<button class="${(f.status||'')===v?'on':''}" role="radio" aria-checked="${(f.status||'')===v}" data-act="fstatus" data-val="${v}">${l}</button>`).join('')}
+    </div>
     ${f.type==='examen' ? `<p class="hint">${ico('info',18)}<span>Se va a agregar “Estudiar ${esc(f.title||'materia')} (N)” en Pendientes durante los ${n} días anteriores al examen.</span></p>` : ''}
     ${err ? `<p class="err" role="alert">${err}</p>` : ''}
     ${f.id && f.repeat ? `<div class="delrow"><button data-act="fdelete-one">Borrar solo este día</button><button data-act="fdelete">Borrar todos</button></div>` : ''}
@@ -795,6 +974,8 @@ function repeatHint(f){
   const extra = f.repeat === 'month' && d.getDate() > 28 ? ' Los meses que no tienen ese día se saltean.' : '';
   return base + end + '.' + extra;
 }
+const STATUS = {pendiente:{label:'Pendiente', dot:'#C7373F'}, curso:{label:'En curso', dot:'#E07B39'}, finalizado:{label:'Finalizado', dot:'#2E8B57', check:true}};
+function statusOf(e, occ){ return e.repeat ? ((e.statusOn || {})[occ || e.date] || '') : (e.status || ''); }
 function readForm(){
   const v = id => { const el = $(id); return el ? el.value : undefined; };
   if(v('fTitle') !== undefined) form.title = v('fTitle');
@@ -825,6 +1006,16 @@ function saveForm(){
   if(!ev.allDay) delete ev.allDay;
   if(!ev.repeat){ delete ev.repeat; delete ev.until; delete ev.skip; }
   else if(!ev.until) delete ev.until;
+  const st = f.status || '';
+  delete ev.status;
+  if(ev.repeat){
+    const key = occ && startsOn(ev, occ) ? occ : ev.date;
+    ev.statusOn = {...(ev.statusOn || {})};
+    if(st) ev.statusOn[key] = st; else delete ev.statusOn[key];
+  } else {
+    delete ev.statusOn;
+    if(st) ev.status = st;
+  }
   if(isNew) state.events.push(ev); else state.events = state.events.map(e => e.id === ev.id ? ev : e);
   save();
   sel = ev.repeat && occ && startsOn(ev, occ) ? occ : ev.date; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()};
@@ -883,7 +1074,22 @@ function syncAddFlag(){
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if(!b) return;
   const a = b.dataset.act;
+  if(b.dataset.wdate && b.dataset.wdate !== sel){ sel = b.dataset.wdate; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()}; renderCalendar(); }
   switch(a){
+    case 'sync-in': cloud.signIn(false); break;
+    case 'sync-up': cloud.signIn(true); break;
+    case 'sync-now': cloud.sync(); break;
+    case 'sync-out': cloud.client.auth.signOut(); cloud.user = null; cloud.msg = ''; renderSettings(); toast('Cerraste sesión. Tus datos siguen en este dispositivo.'); break;
+    case 'wprev': case 'wnext': {
+      sel = addDays(sel, a === 'wprev' ? -7 : 7); const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()};
+      confirmTodoDel = null; renderAll(); break;
+    }
+    case 'wk-toggle': case 'wk-del': {
+      const ws = weekStart(sel); const list = (state.weekTodos && state.weekTodos[ws]) || [];
+      const x = list.find(y => y.id === b.dataset.id); if(!x) break;
+      if(a === 'wk-toggle') x.done = !x.done; else state.weekTodos[ws] = list.filter(y => y !== x);
+      save(); renderWeekTodos(ws); break;
+    }
     case 'menu': renderRiddle(); $('drawer').classList.add('on'); $('overlay').classList.add('on'); break;
     case 'riddle-try': tryRiddle(); break;
     case 'riddle-give': {
@@ -897,6 +1103,7 @@ document.addEventListener('click', e => {
     case 'day': { sel = b.dataset.date; const d = parse(sel); if(d.getMonth() !== view.m){ view = {y:d.getFullYear(), m:d.getMonth()}; } renderCalendar(); renderDay(); renderTodos(); break; }
     case 'add': openSheet(null); break;
     case 'edit': openSheet(state.events.find(x => x.id === b.dataset.id), b.dataset.occ); break;
+    case 'fstatus': readForm(); form.status = b.dataset.val; drawSheet(); break;
     case 'frepeat': readForm(); form.repeat = b.dataset.val; drawSheet(); break;
     case 'del': {
       e.stopPropagation();
@@ -995,6 +1202,16 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape') closeAll();
   if(e.key === 'Enter' && e.target.id === 'todoInput') addTodo();
+  if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('winput') && e.target.dataset.wdate){
+    const v = e.target.value.trim(); if(v){ sel = e.target.dataset.wdate; addTodoOn(e.target.dataset.wdate, v); }
+  }
+  if(e.key === 'Enter' && e.target.id === 'wkInput'){
+    const v = e.target.value.trim(); if(v){
+      const ws = weekStart(sel); state.weekTodos = state.weekTodos || {};
+      (state.weekTodos[ws] = state.weekTodos[ws] || []).push({id:uid(), text:v, done:false});
+      save(); renderWeekTodos(ws); $('wkInput').focus();
+    }
+  }
   if(e.key === 'Enter' && e.target.id === 'riddleInput') tryRiddle();
   if(e.key === 'Enter' && e.target.closest('.sheet') && e.target.tagName === 'INPUT') saveForm();
   if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('ev')){ e.preventDefault(); e.target.click(); }
@@ -1093,6 +1310,145 @@ function tryRiddle(){
     const ni = $('riddleInput'); if(ni){ ni.value = v; ni.focus(); ni.select(); }
   }
 }
+/* ---------- Sincronizar celular y computadora (Supabase) ----------
+   Si config.js no tiene los datos de Supabase, la app funciona igual que siempre, sin sincronizar. */
+const CFG = window.MI_AGENDA_CONFIG || {};
+const SYNC_META = 'mi-agenda-sync';
+function loadScript(src){ return new Promise((ok, fail) => { const x = document.createElement('script'); x.src = src; x.onload = ok; x.onerror = fail; document.head.appendChild(x); }); }
+function normalizeState(o){
+  const s = emptyState(); o = o || {};
+  return Object.assign(s, o, {icons:Object.assign(s.icons, o.icons||{}), colors:Object.assign(s.colors, o.colors||{})});
+}
+function byId(a, b, preferA){
+  const m = new Map();
+  (preferA ? [...(b||[]), ...(a||[])] : [...(a||[]), ...(b||[])]).forEach(x => { if(x && x.id) m.set(x.id, x); });
+  return [...m.values()];
+}
+function mergeDays(a, b, p){
+  const out = {};
+  new Set([...Object.keys(a||{}), ...Object.keys(b||{})]).forEach(k => { const v = byId((a||{})[k], (b||{})[k], p); if(v.length) out[k] = v; });
+  return out;
+}
+/* Junta dos versiones sin perder nada: eventos y tareas se suman por id.
+   preferLocal: si un mismo elemento está en los dos lados, gana el de este dispositivo. */
+function mergeStates(local, remote, preferLocal){
+  const L = normalizeState(local), R = normalizeState(remote);
+  const out = preferLocal ? {...R, ...L} : {...L, ...R};
+  out.icons = preferLocal ? {...R.icons, ...L.icons} : {...L.icons, ...R.icons};
+  out.colors = preferLocal ? {...R.colors, ...L.colors} : {...L.colors, ...R.colors};
+  ['events','rtodos','customTypes','magic'].forEach(k => out[k] = byId(L[k], R[k], preferLocal));
+  out.todos = mergeDays(L.todos, R.todos, preferLocal);
+  out.weekTodos = mergeDays(L.weekTodos, R.weekTodos, preferLocal);
+  out.autoDone = {...(R.autoDone||{}), ...(L.autoDone||{})};
+  return out;
+}
+const cloud = {
+  client:null, user:null, ready:false, busy:false, again:false, applying:false, timer:null, err:'', msg:'', email:'',
+  meta: (() => { try{ return JSON.parse(localStorage.getItem(SYNC_META)) || {}; }catch(e){ return {}; } })(),
+  configured(){ return !!(CFG.supabaseUrl && CFG.supabaseKey); },
+  saveMeta(){ try{ localStorage.setItem(SYNC_META, JSON.stringify(this.meta)); }catch(e){} },
+  refresh(){ if(route === 'set') renderSettings(); },
+  async init(){
+    if(!this.configured()) return;
+    try{
+      if(!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js');
+      this.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, {auth:{persistSession:true, autoRefreshToken:true, storageKey:'mi-agenda-auth'}});
+      const { data } = await this.client.auth.getSession();
+      this.user = data && data.session ? data.session.user : null;
+      this.ready = true;
+      this.client.auth.onAuthStateChange((_ev, session) => {
+        const u = session ? session.user : null;
+        const changed = (u && u.id) !== (this.user && this.user.id);
+        this.user = u;
+        if(changed){ if(u) this.sync(); this.refresh(); }
+      });
+      if(this.user) await this.sync();
+    }catch(e){ this.err = 'No se pudo conectar con Supabase. Revisá config.js o tu internet.'; }
+    this.refresh();
+  },
+  changed(){
+    if(this.applying) return;
+    this.meta.dirty = true; this.saveMeta();
+    if(!this.user) return;
+    clearTimeout(this.timer); this.timer = setTimeout(() => this.sync(), 1500);
+  },
+  table(){ return this.client.from('mi_agenda'); },
+  async fetchRemote(){
+    const { data, error } = await this.table().select('data, updated_at').eq('user_id', this.user.id).maybeSingle();
+    if(error) throw error; return data;
+  },
+  async push(){
+    const { data, error } = await this.table().upsert({user_id:this.user.id, data:state, updated_at:new Date().toISOString()}, {onConflict:'user_id'}).select('updated_at').single();
+    if(error) throw error;
+    Object.assign(this.meta, {lastSyncedAt:data.updated_at, dirty:false, userId:this.user.id, at:Date.now()}); this.saveMeta();
+  },
+  apply(next){ this.applying = true; state = next; save(); this.applying = false; renderAll(); },
+  async sync(){
+    if(!this.user) return;
+    if(this.busy){ this.again = true; return; }
+    if(!navigator.onLine){ this.err = ''; this.refresh(); return; }
+    this.busy = true;
+    try{
+      const remote = await this.fetchRemote();
+      const first = this.meta.userId !== this.user.id;
+      if(!remote) await this.push();                                                      // la nube está vacía: subo lo mío
+      else if(first){ this.apply(mergeStates(state, remote.data, false)); await this.push(); } // primera vez en este dispositivo: junto todo
+      else if(remote.updated_at === this.meta.lastSyncedAt){ if(this.meta.dirty) await this.push(); } // nadie más cambió nada
+      else if(this.meta.dirty){ this.apply(mergeStates(state, remote.data, true)); await this.push(); } // cambiaron los dos lados: junto
+      else { this.apply(normalizeState(remote.data)); Object.assign(this.meta, {lastSyncedAt:remote.updated_at, at:Date.now()}); this.saveMeta(); } // traigo lo nuevo
+      this.err = '';
+    }catch(e){ this.err = (e && e.message) ? e.message : 'Error al sincronizar.'; }
+    this.busy = false; this.refresh();
+    if(this.again){ this.again = false; this.sync(); }
+  },
+  async signIn(create){
+    const email = ($('syncEmail') || {}).value || '', pass = ($('syncPass') || {}).value || '';
+    this.email = email.trim(); this.msg = '';
+    if(!/^\S+@\S+\.\S+$/.test(this.email)){ this.msg = 'Escribí un mail válido.'; return this.refresh(); }
+    if(pass.length < 6){ this.msg = 'La contraseña tiene que tener al menos 6 caracteres.'; return this.refresh(); }
+    this.msg = create ? 'Creando la cuenta…' : 'Entrando…'; this.refresh();
+    const r = create ? await this.client.auth.signUp({email:this.email, password:pass})
+                     : await this.client.auth.signInWithPassword({email:this.email, password:pass});
+    if(r.error){
+      const m = r.error.message || '';
+      this.msg = /invalid login/i.test(m) ? 'El mail o la contraseña no coinciden.'
+        : /not confirmed/i.test(m) ? 'Falta confirmar el mail. Abrí el correo que te llegó y después tocá Entrar.'
+        : /already registered|already exists/i.test(m) ? 'Ese mail ya tiene cuenta. Tocá Entrar.'
+        : 'No se pudo: ' + m;
+    } else if(create && !r.data.session){
+      this.msg = 'Te mandamos un mail para confirmar la cuenta. Confirmalo y después tocá Entrar.';
+    } else { this.msg = ''; }
+    this.refresh();
+  }
+};
+window.miCloud = cloud;
+function syncSection(){
+  const head = `<h2>Sincronizar celular y computadora</h2>`;
+  if(!cloud.configured()) return `<section class="block set">${head}<p class="sub">Todavía no está conectada. Cuando sigas la guía y conectes Supabase, vas a poder entrar con tu cuenta y ver los mismos datos en el celular y en la compu.</p></section>`;
+  if(!cloud.ready) return `<section class="block set">${head}<p class="sub" style="${cloud.err?'color:var(--urgent);font-weight:800':''}">${cloud.err ? esc(cloud.err) : 'Conectando…'}</p></section>`;
+  if(!cloud.user) return `<section class="block set">${head}
+    <p class="sub">Entrá con tu mail y una contraseña. Usá la misma cuenta en el celular y en la compu. Lo que ya cargaste no se borra: se suma a tu cuenta.</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label class="field" style="margin:0"><span>Mail</span><input type="email" id="syncEmail" value="${esc(cloud.email)}" autocomplete="email" autocapitalize="none" placeholder="tu@mail.com"></label>
+      <label class="field" style="margin:0"><span>Contraseña</span><input type="password" id="syncPass" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></label>
+      ${cloud.msg ? `<p class="sub" style="margin:2px 4px;font-weight:800">${esc(cloud.msg)}</p>` : ''}
+      <div class="row2" style="margin-top:4px"><button class="btn primary" data-act="sync-in">Entrar</button><button class="btn ghost" data-act="sync-up">Crear cuenta</button></div>
+    </div></section>`;
+  const at = cloud.meta.at ? new Date(cloud.meta.at) : null;
+  const status = cloud.err ? `<span style="color:var(--urgent);font-weight:800">No se pudo sincronizar: ${esc(cloud.err)}</span>`
+    : cloud.busy ? 'Sincronizando…'
+    : !navigator.onLine ? 'Sin internet. Tus cambios se guardan acá y se suben cuando vuelva la conexión.'
+    : cloud.meta.dirty ? 'Hay cambios esperando para subir.'
+    : at ? `Todo sincronizado (${pad(at.getHours())}:${pad(at.getMinutes())}).` : 'Todavía no se sincronizó.';
+  return `<section class="block set">${head}
+    <p class="sub">Conectada como <b>${esc(cloud.user.email || '')}</b>.<br>${status}</p>
+    <div class="row2"><button class="btn primary" data-act="sync-now">Sincronizar ahora</button><button class="btn ghost" data-act="sync-out">Cerrar sesión</button></div>
+  </section>`;
+}
+window.addEventListener('online', () => cloud.sync());
+document.addEventListener('visibilitychange', () => { if(!document.hidden) cloud.sync(); });
+setInterval(() => { if(!document.hidden) cloud.sync(); }, 60000);
+
 async function backup(){
   const name = `mi-agenda-${todayIso()}.json`;
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
@@ -1150,7 +1506,11 @@ $('addHint').textContent = 'Las tareas con palabras mágicas (como “Estudiar�
 $('pillIcon').innerHTML = ico('cal',17);
 (function tick(){ const d = new Date(); $('clock').textContent = `${d.getHours()}:${pad(d.getMinutes())}`; setTimeout(tick, 30000); })();
 
-renderAll();
+$('wPrev').innerHTML = ico('left',18,2.4);
+$('wNext').innerHTML = ico('right',18,2.4);
+$('topAdd').innerHTML = ico('plus',18,2.4) + ' Nuevo evento';
+applyLayout();
+cloud.init();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
