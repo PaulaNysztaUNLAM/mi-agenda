@@ -196,9 +196,10 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 .sheet.on{transform:none}
 .grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
 .sheet h3{margin:0 0 14px;font-size:20px;font-weight:800}
-.types{display:flex;gap:8px;overflow-x:auto;margin:0 -18px 14px;padding:2px 18px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.types{display:flex;gap:8px;overflow-x:auto;margin:0 -18px 14px;padding:2px 18px 4px;scroll-padding-inline:18px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.types::after{content:"";flex:0 0 10px}
 .types::-webkit-scrollbar{display:none}
-.chip{display:flex;align-items:center;gap:6px;padding:0 14px;height:40px;border-radius:20px;border:0;background:var(--surface-2);font-weight:800;font-size:13px;white-space:nowrap;flex-shrink:0;scroll-snap-align:start}
+.chip{display:flex;align-items:center;gap:6px;padding:0 14px;height:40px;border-radius:20px;border:0;background:var(--surface-2);font-weight:800;font-size:13px;white-space:nowrap;flex-shrink:0;}
 .chip.on{background:var(--accent);color:var(--accent-ink)}
 .field{display:block;margin-bottom:12px}
 .field>span{display:block;font-size:13px;font-weight:800;color:var(--ink-soft);margin:0 0 6px 4px}
@@ -336,6 +337,36 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 .wev .st i{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sheet .reps.status button{font-size:12px}
 .desk .swatches{grid-template-columns:repeat(3,150px)}
+/* Subtareas de TP (formulario, celular y compu) */
+.subbar{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:-2px 0 8px}
+.subbar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.subrow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1.5px dashed var(--line)}
+.subrow:last-child{border-bottom:0}
+.subrow .chk{width:22px;height:22px}
+.subrow.done .chk{background:var(--accent);border-color:var(--accent)}
+.subrow .tx{flex:1;font-weight:700;font-size:15px;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.subrow.done .tx{text-decoration:line-through;color:var(--ink-soft);font-weight:500}
+.subrow .x{border:0;background:transparent;color:var(--ink-faint);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.subadd{display:flex;gap:8px;margin:8px 0 14px}
+.subadd input{flex:1;min-width:0}
+.subadd button{width:46px;height:46px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0}
+.ev .mprog{display:flex;align-items:center;gap:8px;margin-top:5px}
+.ev .mprog b{flex:1;max-width:140px;height:5px;border-radius:3px;background:var(--line);overflow:hidden;display:block}
+.ev .mprog b i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.ev .mprog span{font-size:12px;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.sv-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:14px}
+.sv-head h3{margin:0;font-size:20px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.sv-when{margin:4px 0 0;font-size:13px;color:var(--ink-soft);font-weight:700}
+.sv-btn{width:42px;height:42px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0;color:var(--ink)}
+.sv-done{margin:12px 4px 0;font-weight:800;font-size:14px}
+.wev .wprog{display:flex;align-items:center;gap:5px;margin-top:3px}
+.wev .wprog b{flex:1;height:4px;border-radius:2px;background:rgba(29,51,82,.18);overflow:hidden;display:block}
+.wev .wprog b i{display:block;height:100%;background:var(--ink);border-radius:2px}
+.wev .wprog span{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
+/* Arrastrar pendientes (solo compu) */
+.wtodo[draggable="true"]{cursor:grab}
+.wtodo.dragging{opacity:.35}
+.wcol.over{box-shadow:0 0 0 3px var(--accent)}
 .desk .toast{left:auto;right:24px;width:360px}
 </style>
 </head>
@@ -676,7 +707,7 @@ function renderDay(){
     const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
     return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}" data-occ="${e._occ}">
       <span class="ic">${ico(state.icons[e.type] === 'none' ? 'dot' : state.icons[e.type],18)}</span>
-      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div></span>
+      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div>${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<div class="mprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length} subtareas</span></div>`; })() : ''}</span>
       <button class="del" data-act="del" data-id="${e.id}" data-occ="${e._occ}" aria-label="${e.repeat ? 'Eliminar solo este día de ' : 'Eliminar '}${esc(e.title)}">${ico('trash',17)}</button>
     </div>`;
   }).join('') : `<p class="empty">No tenés eventos este día. Tocá + para agregar uno.</p>`;
@@ -834,19 +865,19 @@ function renderWeek(){
       const c = state.colors && state.colors[e.type];
       const icon = state.icons[e.type] === 'none' || !state.icons[e.type] ? 'dot' : state.icons[e.type];
       return `<button class="wev" data-act="edit" data-id="${e.id}" data-occ="${e._occ}" data-wdate="${s}"${c ? ` style="background:${c}66"` : ''}>
-        ${ico(icon, 13)}<span style="min-width:0"><span class="t">${time}${e.repeat ? ' ↻' : ''}</span><span class="n">${esc(eventTitle(e))}</span>${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<span class="st">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',11,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</span>` : ''; })()}</span></button>`;
+        ${ico(icon, 13)}<span style="min-width:0"><span class="t">${time}${e.repeat ? ' ↻' : ''}</span><span class="n">${esc(eventTitle(e))}</span>${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<span class="wprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length}</span></span>`; })() : ''}${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<span class="st">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',11,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</span>` : ''; })()}</span></button>`;
     }).join('') : `<p class="wempty">Sin eventos</p>`;
     const list = todosOn(s);
     const tdHtml = list.map(x => {
       const ref = x.auto ? `data-key="${x.key}"` : x.rep ? `data-rid="${x.id}"` : `data-id="${x.id}"`;
       const emo = markerFor(x.text, x.auto);
-      return `<div class="wtodo${x.done?' done':''}${x.urgent?' urgent':''}">
+      return `<div class="wtodo${x.done?' done':''}${x.urgent?' urgent':''}"${!x.auto && !x.rep ? ` draggable="true" data-drag="${x.id}" data-from="${s}" title="Arrastrala a otro día"` : ''}>
         <button class="chk" data-act="todo-toggle" ${ref} data-wdate="${s}" role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done ? ico('check',10,3.4) : ''}</button>
         <span class="txt">${emo ? `<span class="emo" aria-hidden="true">${ico(emo,13)}</span>` : ''}${esc(x.text)}${x.rep ? `<span class="rep" aria-label="Se repite">${ico('repeat',11)}</span>` : ''}</span>
         ${x.auto ? '' : `<span class="acts"><button class="${x.urgent?'on':''}" data-act="todo-flag" ${ref} data-wdate="${s}" aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',13)}</button><button data-act="todo-del" ${ref} data-wdate="${s}" aria-label="Borrar tarea">${ico('x',13)}</button></span>`}
       </div>${x.rep && confirmTodoDel === x.id && s === sel ? `<div class="tconfirm"><button data-act="rtodo-skip" data-rid="${x.id}" data-wdate="${s}">Solo este día</button><button class="danger" data-act="rtodo-delall" data-rid="${x.id}" data-wdate="${s}">Todos</button><button data-act="rtodo-cancel">No</button></div>` : ''}`;
     }).join('');
-    return `<section class="wcol${s===t?' today':''}" aria-label="${fmtWd.format(d)} ${d.getDate()}">
+    return `<section class="wcol${s===t?' today':''}" data-drop="${s}" aria-label="${fmtWd.format(d)} ${d.getDate()}">
       <div class="whead"${tint ? ` style="background:${tint.bg};color:${tint.ink}"` : ''}>
         <div><div class="wn">${s===t ? 'Hoy, ' + fmtWd.format(d) : fmtWd.format(d)}</div><div class="wm">${fmtMonth.format(d)}</div></div>
         <div class="wnum">${pad(d.getDate())}</div>
@@ -878,6 +909,38 @@ function addTodoOn(day, text){
   const again = document.getElementById('wi-' + day); if(again) again.focus();
   if(urgent) toast('Tarea urgente: el día queda en rojo hasta completarla.');
 }
+let dragTodo = null;
+document.addEventListener('dragstart', e => {
+  const el = e.target.closest && e.target.closest('.wtodo[draggable="true"]'); if(!el) return;
+  dragTodo = {id:el.dataset.drag, from:el.dataset.from};
+  e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', el.dataset.drag);
+  requestAnimationFrame(() => el.classList.add('dragging'));
+});
+document.addEventListener('dragend', () => { dragTodo = null; document.querySelectorAll('.wtodo.dragging,.wcol.over').forEach(x => x.classList.remove('dragging','over')); });
+document.addEventListener('dragover', e => {
+  if(!dragTodo) return;
+  const col = e.target.closest && e.target.closest('.wcol[data-drop]'); if(!col) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.wcol.over').forEach(x => { if(x !== col) x.classList.remove('over'); });
+  col.classList.add('over');
+});
+document.addEventListener('drop', e => {
+  if(!dragTodo) return;
+  const col = e.target.closest && e.target.closest('.wcol[data-drop]'); if(!col) return;
+  e.preventDefault();
+  const {id, from} = dragTodo, to = col.dataset.drop; dragTodo = null;
+  if(to === from){ renderWeek(); return; }
+  const list = state.todos[from] || [], idx = list.findIndex(x => x.id === id); if(idx < 0) return;
+  const [item] = list.splice(idx, 1);
+  (state.todos[to] = state.todos[to] || []).push(item);
+  save(); renderCalendar(); renderDay(); renderTodos();
+  const d = parse(to);
+  toast(`“${item.text}” pasó al ${fmtWd.format(d)} ${d.getDate()}.`, () => {
+    state.todos[to] = (state.todos[to] || []).filter(x => x.id !== id);
+    (state.todos[from] = state.todos[from] || []).splice(idx, 0, item);
+    save(); renderCalendar(); renderDay(); renderTodos();
+  });
+});
 function applyLayout(){
   const desk = isDesk();
   document.documentElement.classList.toggle('desk', desk);
@@ -896,11 +959,33 @@ function renderAll(){
 
 /* ---------- Hoja de evento ---------- */
 function openSheet(ev, occ){
-  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date, status:statusOf(ev, occ)} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:'', status:''};
+  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date, status:statusOf(ev, occ), subs:(ev.subs || []).map(x => ({...x}))} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:'', status:''};
   drawSheet(); $('sheet').classList.add('on'); $('overlay').classList.add('on');
   setTimeout(() => { const i = $('fTitle'); if(i && !ev) i.focus(); }, 320);
 }
+function drawSubsView(){
+  const f = form, list = f.subs || [], done = list.filter(x => x.done).length;
+  const day = f._occ || f.date, d = parse(day);
+  const when = `${cap(fmtWd.format(d))} ${d.getDate()} de ${fmtMonth.format(d)}, ${f.allDay ? 'todo el día' : f.end ? `${fmtT(f.start)} – ${fmtT(f.end)}` : fmtT(f.start)}`;
+  $('sheet').innerHTML = `
+    <div class="grab"></div>
+    <div class="sv-head">
+      <div style="min-width:0;flex:1"><h3 id="sheetTitle">${esc(eventTitle(f))}</h3><p class="sv-when">${when}</p></div>
+      <button class="sv-btn" data-act="sub-edit" aria-label="Editar evento" title="Editar">${ico('pencil',18)}</button>
+      <button class="sv-btn" data-act="close-all" aria-label="Cerrar">${ico('x',18)}</button>
+    </div>
+    <div class="field"><span>Subtareas (${done} de ${list.length})</span></div>
+    <div class="subbar"><i style="width:${list.length ? Math.round(done * 100 / list.length) : 0}%"></i></div>
+    <div class="svlist">${list.map(x => `<div class="subrow${x.done ? ' done' : ''}">
+      <button class="chk" data-act="sub-toggle" data-sid="${x.id}" role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done ? ico('check',12,3.4) : ''}</button>
+      <span class="tx">${esc(x.text)}</span>
+      <button class="x" data-act="sub-del" data-sid="${x.id}" aria-label="Borrar ${esc(x.text)}">${ico('x',16)}</button></div>`).join('') || '<p class="sv-when" style="margin:4px 4px 8px">No quedan subtareas. Agregá una abajo.</p>'}</div>
+    <div class="subadd"><label for="fSub" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nueva subtarea</label><input type="text" id="fSub" placeholder="Nueva subtarea" maxlength="80" autocomplete="off"><button data-act="sub-add" aria-label="Agregar subtarea">${ico('plus',20,2.4)}</button></div>
+    ${list.length && done === list.length ? '<p class="sv-done">¡Hiciste todas las subtareas!</p>' : ''}
+    <div class="actions" style="margin-top:16px"><button class="btn primary" data-act="close-all">Listo</button></div>`;
+}
 function drawSheet(err=''){
+  if(form && form.view === 'subs') return drawSubsView();
   const f = form, T = TYPES[f.type];
   const n = state.studyDays;
   $('sheet').innerHTML = `
@@ -926,6 +1011,7 @@ function drawSheet(err=''){
     </div>
     ${f.repeat ? `<label class="field"><span>Hasta (opcional)</span><input type="date" id="fUntil" value="${f.until||''}"></label>
     <p class="hint">${ico('repeat',18)}<span>${repeatHint(f)}</span></p>` : ''}
+    ${subsBlock(f)}
     <div class="field"><span>Estado${f.repeat ? ' (de este día)' : ''}</span></div>
     <div class="reps status" role="radiogroup" aria-label="Estado">
       ${[['','Sin estado'],['pendiente','Pendiente'],['curso','En curso'],['finalizado','Finalizado']].map(([v,l]) => `<button class="${(f.status||'')===v?'on':''}" role="radio" aria-checked="${(f.status||'')===v}" data-act="fstatus" data-val="${v}">${l}</button>`).join('')}
@@ -939,7 +1025,11 @@ function drawSheet(err=''){
       <button class="btn primary" data-act="fsave">Guardar</button>
     </div>`;
   const tw = $('sheet').querySelector('.types'), on = tw && tw.querySelector('.chip.on');
-  if(tw && on) tw.scrollLeft = Math.max(0, on.offsetLeft - tw.firstElementChild.offsetLeft - 40);
+  if(tw && on){   // solo se corre si el tipo elegido quedó tapado, y siempre deja el margen
+    const r = on.getBoundingClientRect(), c = tw.getBoundingClientRect();
+    if(r.right > c.right - 18) tw.scrollLeft += r.right - c.right + 18;
+    else if(r.left < c.left + 18) tw.scrollLeft -= c.left + 18 - r.left;
+  }
 }
 /* ---------- Selector de hora: AM = 00–11, PM = 12–23 ---------- */
 function splitT(hm){ const [h, m] = hm.split(':').map(Number); return {h, m}; }
@@ -976,6 +1066,29 @@ function repeatHint(f){
 }
 const STATUS = {pendiente:{label:'Pendiente', dot:'#C7373F'}, curso:{label:'En curso', dot:'#E07B39'}, finalizado:{label:'Finalizado', dot:'#2E8B57', check:true}};
 function statusOf(e, occ){ return e.repeat ? ((e.statusOn || {})[occ || e.date] || '') : (e.status || ''); }
+function subsBlock(f){
+  const list = f.subs || [];
+  if(list.length){   // ya tiene: se manejan desde la ventana de subtareas
+    const done = list.filter(x => x.done).length;
+    return `<div class="field"><span>Subtareas (${done} de ${list.length})</span></div>
+      <p class="hint">${ico('check',18)}<span>${f.id ? 'Para agregar más o tacharlas, cerrá esto y tocá el evento.' : 'Guardá el evento y tocalo para agregar más o tacharlas.'}</span></p>`;
+  }
+  return `<div class="field"><span>Subtareas</span></div>
+    <div class="subadd"><label for="fSub" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Primera subtarea</label><input type="text" id="fSub" placeholder="Agregar una subtarea" maxlength="80" autocomplete="off"><button data-act="sub-add" aria-label="Agregar subtarea">${ico('plus',20,2.4)}</button></div>`;
+}
+/* Si el TP ya existe, cada cambio en las subtareas se guarda al momento (aunque después toques Cancelar). */
+function persistSubs(){
+  if(!form.id) return;
+  const ev = state.events.find(x => x.id === form.id); if(!ev) return;
+  ev.subs = (form.subs || []).map(x => ({...x})); save(); renderCalendar(); renderDay();
+}
+function addSub(){
+  readForm();
+  const i = $('fSub'), v = i ? i.value.trim() : ''; if(!v) return;
+  form.subs = [...(form.subs || []), {id:uid(), text:v, done:false}];
+  persistSubs(); drawSheet();
+  const ni = $('fSub'); if(ni) ni.focus();
+}
 function readForm(){
   const v = id => { const el = $(id); return el ? el.value : undefined; };
   if(v('fTitle') !== undefined) form.title = v('fTitle');
@@ -1102,7 +1215,16 @@ document.addEventListener('click', e => {
     case 'today': { sel = todayIso(); const d = new Date(); view = {y:d.getFullYear(), m:d.getMonth()}; renderAll(); break; }
     case 'day': { sel = b.dataset.date; const d = parse(sel); if(d.getMonth() !== view.m){ view = {y:d.getFullYear(), m:d.getMonth()}; } renderCalendar(); renderDay(); renderTodos(); break; }
     case 'add': openSheet(null); break;
-    case 'edit': openSheet(state.events.find(x => x.id === b.dataset.id), b.dataset.occ); break;
+    case 'edit': {
+      const ev = state.events.find(x => x.id === b.dataset.id); if(!ev) break;
+      openSheet(ev, b.dataset.occ);
+      if(ev.subs && ev.subs.length){ form.view = 'subs'; drawSheet(); }   // con subtareas: primero la lista para tachar
+      break;
+    }
+    case 'sub-edit': form.view = null; drawSheet(); setTimeout(() => { const t = $('fTitle'); if(t) t.focus(); }, 50); break;
+    case 'sub-add': addSub(); break;
+    case 'sub-toggle': { readForm(); const x = (form.subs || []).find(y => y.id === b.dataset.sid); if(x) x.done = !x.done; persistSubs(); drawSheet(); break; }
+    case 'sub-del': { readForm(); form.subs = (form.subs || []).filter(y => y.id !== b.dataset.sid); persistSubs(); drawSheet(); break; }
     case 'fstatus': readForm(); form.status = b.dataset.val; drawSheet(); break;
     case 'frepeat': readForm(); form.repeat = b.dataset.val; drawSheet(); break;
     case 'del': {
@@ -1213,6 +1335,7 @@ document.addEventListener('keydown', e => {
     }
   }
   if(e.key === 'Enter' && e.target.id === 'riddleInput') tryRiddle();
+  if(e.key === 'Enter' && e.target.id === 'fSub'){ e.preventDefault(); addSub(); return; }
   if(e.key === 'Enter' && e.target.closest('.sheet') && e.target.tagName === 'INPUT') saveForm();
   if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('ev')){ e.preventDefault(); e.target.click(); }
 });
@@ -1342,6 +1465,15 @@ function mergeStates(local, remote, preferLocal){
   out.autoDone = {...(R.autoDone||{}), ...(L.autoDone||{})};
   return out;
 }
+/* Arregla la dirección de Supabase si se pegó con algo de más
+   (por ejemplo ".../rest/v1/" o el link del panel), que es lo que causa "Invalid path specified in request URL". */
+function cleanSupabaseUrl(raw){
+  let t = String(raw || '').trim().replace(/^['"]|['"]$/g, '');
+  const dash = t.match(/supabase\.com\/dashboard\/project\/([a-z0-9]+)/i);
+  if(dash) return `https://${dash[1]}.supabase.co`;
+  if(!/^https?:\/\//i.test(t)) t = 'https://' + t;
+  try{ return new URL(t).origin; }catch(e){ return t; }
+}
 const cloud = {
   client:null, user:null, ready:false, busy:false, again:false, applying:false, timer:null, err:'', msg:'', email:'',
   meta: (() => { try{ return JSON.parse(localStorage.getItem(SYNC_META)) || {}; }catch(e){ return {}; } })(),
@@ -1352,7 +1484,7 @@ const cloud = {
     if(!this.configured()) return;
     try{
       if(!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js');
-      this.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, {auth:{persistSession:true, autoRefreshToken:true, storageKey:'mi-agenda-auth'}});
+      this.client = window.supabase.createClient(cleanSupabaseUrl(CFG.supabaseUrl), String(CFG.supabaseKey).trim(), {auth:{persistSession:true, autoRefreshToken:true, storageKey:'mi-agenda-auth'}});
       const { data } = await this.client.auth.getSession();
       this.user = data && data.session ? data.session.user : null;
       this.ready = true;
@@ -1432,6 +1564,8 @@ const cloud = {
       this.msg = /invalid login/i.test(m) ? 'El mail o la contraseña no coinciden.'
         : /not confirmed/i.test(m) ? 'Falta confirmar el mail. Abrí el correo que te llegó y después tocá Entrar.'
         : /already registered|already exists/i.test(m) ? 'Ese mail ya tiene cuenta. Tocá Entrar.'
+        : /invalid path/i.test(m) ? 'La dirección de Supabase en config.js no es correcta. Tiene que ser solo https://algo.supabase.co, sin nada después.'
+        : /invalid api key|no api key/i.test(m) ? 'La llave de config.js no es correcta. Copiá de nuevo la Publishable key de Supabase.'
         : 'No se pudo: ' + m;
     } else if(create && !r.data.session){
       this.msg = 'Te mandamos un mail para confirmar la cuenta. Confirmalo y después tocá Entrar.';
