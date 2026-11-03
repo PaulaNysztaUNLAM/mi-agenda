@@ -350,6 +350,8 @@ input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.8}
 .subadd{display:flex;gap:8px;margin:8px 0 14px}
 .subadd input{flex:1;min-width:0}
 .subadd button{width:46px;height:46px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0}
+.ev .mst{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--ink-soft);margin-top:3px}
+.ev .mst i{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .ev .mprog{display:flex;align-items:center;gap:8px;margin-top:5px}
 .ev .mprog b{flex:1;max-width:140px;height:5px;border-radius:3px;background:var(--line);overflow:hidden;display:block}
 .ev .mprog b i{display:block;height:100%;background:var(--accent);border-radius:3px}
@@ -707,7 +709,7 @@ function renderDay(){
     const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
     return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}" data-occ="${e._occ}">
       <span class="ic">${ico(state.icons[e.type] === 'none' ? 'dot' : state.icons[e.type],18)}</span>
-      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div>${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<div class="mprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length} subtareas</span></div>`; })() : ''}</span>
+      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div>${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<div class="mst">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',12,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</div>` : ''; })()}${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<div class="mprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length} subtareas</span></div>`; })() : ''}</span>
       <button class="del" data-act="del" data-id="${e.id}" data-occ="${e._occ}" aria-label="${e.repeat ? 'Eliminar solo este día de ' : 'Eliminar '}${esc(e.title)}">${ico('trash',17)}</button>
     </div>`;
   }).join('') : `<p class="empty">No tenés eventos este día. Tocá + para agregar uno.</p>`;
