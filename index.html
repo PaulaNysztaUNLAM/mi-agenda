@@ -621,7 +621,8 @@ function autoTodos(s){
     .map(e => ({e, n:diffDays(s, e.date)}))
     .filter(x => x.n >= 1 && x.n <= state.studyDays)
     .sort((a,b) => a.n - b.n)
-    .map(x => { const key = x.e.id+'|'+s; return {key, text:`Estudiar ${x.e.title} (${x.n})`, done:!!state.autoDone[key], auto:true}; });
+    .map(x => { const key = x.e.id+'|'+s; return {key, text:`Estudiar ${x.e.title} (${x.n})`, done:!!state.autoDone[key], auto:true}; })
+    .filter(x => !(state.autoHidden && state.autoHidden[x.key]));   // los que borraste no vuelven a aparecer
 }
 function rtodosOn(s){
   return (state.rtodos || []).filter(r => startsOn(r, s))
@@ -727,7 +728,7 @@ function renderTodos(){
     return `<div class="todo${x.done?' done':''}${x.urgent?' urgent':''}">
       <button class="chk" data-act="todo-toggle" ${ref} role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done?ico('check',14,3):''}</button>
       <span class="txt">${emo?`<span class="emo" aria-hidden="true">${ico(emo,17)}</span>`:''}${esc(x.text)}${x.rep?`<span class="rep" title="${repTxt}" aria-label="${repTxt}">${ico('repeat',13)}</span>`:''}</span>
-      ${x.auto?'':`<button class="flag${x.urgent?' on':''}" data-act="todo-flag" ${ref} aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',16)}</button><button class="x" data-act="todo-del" ${ref} aria-label="Borrar tarea">${ico('x',16)}</button>`}
+      ${x.auto?`<button class="x" data-act="todo-del" ${ref} aria-label="Borrar tarea">${ico('x',16)}</button>`:`<button class="flag${x.urgent?' on':''}" data-act="todo-flag" ${ref} aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',16)}</button><button class="x" data-act="todo-del" ${ref} aria-label="Borrar tarea">${ico('x',16)}</button>`}
     </div>${x.rep && confirmTodoDel === x.id ? `<div class="tconfirm">Borrar: <button data-act="rtodo-skip" data-rid="${x.id}">Solo este día</button><button class="danger" data-act="rtodo-delall" data-rid="${x.id}">Todos los días</button><button data-act="rtodo-cancel">Cancelar</button></div>` : ''}`;
   }).join('') : `<p class="empty">Nada pendiente para este día.</p>`;
   renderWeek();
@@ -876,7 +877,7 @@ function renderWeek(){
       return `<div class="wtodo${x.done?' done':''}${x.urgent?' urgent':''}"${!x.auto && !x.rep ? ` draggable="true" data-drag="${x.id}" data-from="${s}" title="Arrastrala a otro día"` : ''}>
         <button class="chk" data-act="todo-toggle" ${ref} data-wdate="${s}" role="checkbox" aria-checked="${x.done}" aria-label="${esc(x.text)}">${x.done ? ico('check',10,3.4) : ''}</button>
         <span class="txt">${emo ? `<span class="emo" aria-hidden="true">${ico(emo,13)}</span>` : ''}${esc(x.text)}${x.rep ? `<span class="rep" aria-label="Se repite">${ico('repeat',11)}</span>` : ''}</span>
-        ${x.auto ? '' : `<span class="acts"><button class="${x.urgent?'on':''}" data-act="todo-flag" ${ref} data-wdate="${s}" aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',13)}</button><button data-act="todo-del" ${ref} data-wdate="${s}" aria-label="Borrar tarea">${ico('x',13)}</button></span>`}
+        ${x.auto ? `<span class="acts"><button data-act="todo-del" ${ref} data-wdate="${s}" aria-label="Borrar tarea">${ico('x',13)}</button></span>` : `<span class="acts"><button class="${x.urgent?'on':''}" data-act="todo-flag" ${ref} data-wdate="${s}" aria-pressed="${!!x.urgent}" aria-label="Marcar como urgente">${ico('flag',13)}</button><button data-act="todo-del" ${ref} data-wdate="${s}" aria-label="Borrar tarea">${ico('x',13)}</button></span>`}
       </div>${x.rep && confirmTodoDel === x.id && s === sel ? `<div class="tconfirm"><button data-act="rtodo-skip" data-rid="${x.id}" data-wdate="${s}">Solo este día</button><button class="danger" data-act="rtodo-delall" data-rid="${x.id}" data-wdate="${s}">Todos</button><button data-act="rtodo-cancel">No</button></div>` : ''}`;
     }).join('');
     return `<section class="wcol${s===t?' today':''}" data-drop="${s}" aria-label="${fmtWd.format(d)} ${d.getDate()}">
@@ -1245,6 +1246,12 @@ document.addEventListener('click', e => {
       save(); renderCalendar(); renderTodos(); renderDay(); break;
     }
     case 'todo-del':
+      if(b.dataset.key){   // "Estudiar (N)" automático: se oculta solo ese día
+        const k = b.dataset.key; state.autoHidden = state.autoHidden || {}; state.autoHidden[k] = true;
+        save(); renderCalendar(); renderDay(); renderTodos();
+        toast('Tarea borrada.', () => { delete state.autoHidden[k]; save(); renderCalendar(); renderDay(); renderTodos(); });
+        break;
+      }
       if(b.dataset.rid){ confirmTodoDel = confirmTodoDel === b.dataset.rid ? null : b.dataset.rid; renderTodos(); break; }
       {
         const day = sel, list = state.todos[day] || [], idx = list.findIndex(x => x.id === b.dataset.id); if(idx < 0) break;
@@ -1465,6 +1472,7 @@ function mergeStates(local, remote, preferLocal){
   out.todos = mergeDays(L.todos, R.todos, preferLocal);
   out.weekTodos = mergeDays(L.weekTodos, R.weekTodos, preferLocal);
   out.autoDone = {...(R.autoDone||{}), ...(L.autoDone||{})};
+  out.autoHidden = {...(R.autoHidden||{}), ...(L.autoHidden||{})};
   return out;
 }
 /* Arregla la dirección de Supabase si se pegó con algo de más
