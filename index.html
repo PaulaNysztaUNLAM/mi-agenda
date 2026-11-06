@@ -710,7 +710,7 @@ function renderDay(){
     const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
     return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}" data-occ="${e._occ}">
       <span class="ic">${ico(state.icons[e.type] === 'none' ? 'dot' : state.icons[e.type],18)}</span>
-      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div>${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<div class="mst">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',12,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</div>` : ''; })()}${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<div class="mprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length} subtareas</span></div>`; })() : ''}</span>
+      <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}${e.remind && e.remind.length ? `<span class="rep" title="Tiene recordatorio" aria-label="Tiene recordatorio">${ico('bell',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div>${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<div class="mst">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',12,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</div>` : ''; })()}${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<div class="mprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length} subtareas</span></div>`; })() : ''}</span>
       <button class="del" data-act="del" data-id="${e.id}" data-occ="${e._occ}" aria-label="${e.repeat ? 'Eliminar solo este día de ' : 'Eliminar '}${esc(e.title)}">${ico('trash',17)}</button>
     </div>`;
   }).join('') : `<p class="empty">No tenés eventos este día. Tocá + para agregar uno.</p>`;
@@ -801,6 +801,7 @@ function renderSettings(){
       <input type="text" id="urgentInput" maxlength="120" value="${esc(state.urgentWords)}" placeholder="Ej: pagar, factura, vence">
     </section>
     ${syncSection()}
+    ${pushSection()}
     <section class="block set">
       <h2>Copia de seguridad</h2>
       <p class="sub">Tus datos se guardan en este dispositivo. Descargá una copia de vez en cuando y guardala en Drive, WhatsApp o Archivos.</p>
@@ -868,7 +869,7 @@ function renderWeek(){
       const c = state.colors && state.colors[e.type];
       const icon = state.icons[e.type] === 'none' || !state.icons[e.type] ? 'dot' : state.icons[e.type];
       return `<button class="wev" data-act="edit" data-id="${e.id}" data-occ="${e._occ}" data-wdate="${s}"${c ? ` style="background:${c}66"` : ''}>
-        ${ico(icon, 13)}<span style="min-width:0"><span class="t">${time}${e.repeat ? ' ↻' : ''}</span><span class="n">${esc(eventTitle(e))}</span>${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<span class="wprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length}</span></span>`; })() : ''}${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<span class="st">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',11,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</span>` : ''; })()}</span></button>`;
+        ${ico(icon, 13)}<span style="min-width:0"><span class="t">${time}${e.repeat ? ' ↻' : ''}${e.remind && e.remind.length ? `<span style="display:inline-flex;vertical-align:-2px;margin-left:4px" aria-label="Tiene recordatorio">${ico('bell',11)}</span>` : ''}</span><span class="n">${esc(eventTitle(e))}</span>${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<span class="wprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length}</span></span>`; })() : ''}${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<span class="st">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',11,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</span>` : ''; })()}</span></button>`;
     }).join('') : `<p class="wempty">Sin eventos</p>`;
     const list = todosOn(s);
     const tdHtml = list.map(x => {
@@ -962,7 +963,7 @@ function renderAll(){
 
 /* ---------- Hoja de evento ---------- */
 function openSheet(ev, occ){
-  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date, status:statusOf(ev, occ), subs:(ev.subs || []).map(x => ({...x}))} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:'', status:''};
+  form = ev ? {...ev, allDay:!!ev.allDay, repeat:ev.repeat || '', until:ev.until || '', _occ:occ || ev.date, status:statusOf(ev, occ), subs:(ev.subs || []).map(x => ({...x})), remind:[...(ev.remind || [])]} : {id:null, type:'evento', title:'', date:sel, endDate:'', start:'09:00', end:'10:00', allDay:false, repeat:'', until:'', status:'', remind:[]};
   drawSheet(); $('sheet').classList.add('on'); $('overlay').classList.add('on');
   setTimeout(() => { const i = $('fTitle'); if(i && !ev) i.focus(); }, 320);
 }
@@ -1014,6 +1015,10 @@ function drawSheet(err=''){
     </div>
     ${f.repeat ? `<label class="field"><span>Hasta (opcional)</span><input type="date" id="fUntil" value="${f.until||''}"></label>
     <p class="hint">${ico('repeat',18)}<span>${repeatHint(f)}</span></p>` : ''}
+    <div class="field"><span>Recordarme (antes de que empiece)</span></div>
+    <div class="reps remind" role="group" aria-label="Recordarme">
+      ${REMIND_OPTS.map(([m,l]) => `<button class="${(f.remind||[]).includes(m)?'on':''}" aria-pressed="${(f.remind||[]).includes(m)}" data-act="fremind" data-val="${m}">${l}</button>`).join('')}
+    </div>
     ${subsBlock(f)}
     <div class="field"><span>Estado${f.repeat ? ' (de este día)' : ''}</span></div>
     <div class="reps status" role="radiogroup" aria-label="Estado">
@@ -1132,6 +1137,7 @@ function saveForm(){
     delete ev.statusOn;
     if(st) ev.status = st;
   }
+  if(!ev.remind || !ev.remind.length) delete ev.remind; else ev.remind = [...ev.remind].sort((a,b) => b - a);
   if(isNew) state.events.push(ev); else state.events = state.events.map(e => e.id === ev.id ? ev : e);
   save();
   sel = ev.repeat && occ && startsOn(ev, occ) ? occ : ev.date; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()};
@@ -1226,6 +1232,10 @@ document.addEventListener('click', e => {
     }
     case 'sub-edit': form.view = null; drawSheet(); setTimeout(() => { const t = $('fTitle'); if(t) t.focus(); }, 50); break;
     case 'sub-add': addSub(); break;
+    case 'fremind': { readForm(); const m = Number(b.dataset.val); const r = form.remind || []; form.remind = r.includes(m) ? r.filter(x => x !== m) : [...r, m]; drawSheet(); break; }
+    case 'push-on': pushEnable(); break;
+    case 'push-off': pushDisable(); break;
+    case 'push-test': pushTest(); break;
     case 'sub-toggle': { readForm(); const x = (form.subs || []).find(y => y.id === b.dataset.sid); if(x) x.done = !x.done; persistSubs(); drawSheet(); break; }
     case 'sub-del': { readForm(); form.subs = (form.subs || []).filter(y => y.id !== b.dataset.sid); persistSubs(); drawSheet(); break; }
     case 'fstatus': readForm(); form.status = b.dataset.val; drawSheet(); break;
@@ -1502,7 +1512,7 @@ const cloud = {
         const u = session ? session.user : null;
         const changed = (u && u.id) !== (this.user && this.user.id);
         this.user = u;
-        if(changed){ if(u){ this.sync(); this.listen(); } else this.unlisten(); this.refresh(); }
+        if(changed){ if(u){ this.sync(); this.listen(); pushCheck(); } else this.unlisten(); this.refresh(); }
       });
       if(this.user){ await this.sync(); this.listen(); }
     }catch(e){ this.err = 'No se pudo conectar con Supabase. Revisá config.js o tu internet.'; }
@@ -1584,6 +1594,89 @@ const cloud = {
   }
 };
 window.miCloud = cloud;
+
+/* ---------- Recordatorios (notificaciones) ---------- */
+const REMIND_OPTS = [[0,'Al empezar'],[15,'15 min'],[60,'1 hora'],[1440,'1 día']];
+const push = {on:false, busy:false, msg:''};
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function b64ToBytes(b64){
+  const s = (b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+}
+function deviceName(){
+  const u = navigator.userAgent;
+  return /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : 'Navegador';
+}
+async function saveSub(sub){
+  const j = sub.toJSON();
+  const { error } = await cloud.client.from('push_subs').upsert({
+    endpoint:j.endpoint, user_id:cloud.user.id, p256dh:j.keys.p256dh, auth:j.keys.auth,
+    tz:Intl.DateTimeFormat().resolvedOptions().timeZone, device:deviceName()
+  }, {onConflict:'endpoint'});
+  if(error) throw error;
+}
+async function pushCheck(){
+  if(!pushSupported() || !cloud.user || !CFG.vapidPublicKey) return;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    push.on = !!sub && Notification.permission === 'granted';
+    if(push.on) await saveSub(sub);   // por si cambió, la vuelve a guardar
+  }catch(e){}
+  cloud.refresh();
+}
+async function pushEnable(){
+  push.msg = ''; push.busy = true; cloud.refresh();
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){ push.msg = 'No diste permiso. Si te equivocaste, activalo en Ajustes > Notificaciones > Mi agenda.'; return; }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub) sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64ToBytes(String(CFG.vapidPublicKey).trim())});
+    await saveSub(sub);
+    push.on = true; toast('Notificaciones activadas en este dispositivo.');
+  }catch(e){ push.msg = 'No se pudo activar: ' + (e && e.message ? e.message : e); }
+  finally{ push.busy = false; cloud.refresh(); }
+}
+async function pushDisable(){
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if(sub){ await cloud.client.from('push_subs').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
+  }catch(e){}
+  push.on = false; push.msg = ''; cloud.refresh(); toast('Notificaciones desactivadas en este dispositivo.');
+}
+async function pushTest(){
+  push.msg = 'Mandando la prueba…'; cloud.refresh();
+  try{
+    const { data, error } = await cloud.client.functions.invoke('recordatorios', {body:{test:true}});
+    if(error) throw error;
+    push.msg = data && data.sent ? 'Listo: en unos segundos te llega la notificación de prueba.' : 'La función respondió, pero no encontró este dispositivo. Tocá Desactivar y activá de nuevo.';
+  }catch(e){ push.msg = 'No se pudo mandar la prueba. Revisá que la función “recordatorios” esté creada (Paso 3 de la guía).'; }
+  cloud.refresh();
+}
+function pushSection(){
+  const head = '<h2>Recordatorios</h2>';
+  const box = (txt, extra = '') => `<section class="block set">${head}<p class="sub">${txt}</p>${extra}</section>`;
+  if(!cloud.configured() || !cloud.user) return box('Para recibir recordatorios, primero conectá la sincronización e iniciá sesión (arriba).');
+  if(!CFG.vapidPublicKey) return box('Falta la llave de notificaciones en config.js. Seguí la guía “Recordatorios en el iPhone”.');
+  if(isIOS() && !isInstalled()) return box('En el iPhone, los recordatorios solo funcionan si abrís la app desde el ícono de la pantalla de inicio.');
+  if(!pushSupported()) return box('Este navegador no permite notificaciones. Probá con Chrome o Edge, o con la app instalada.');
+  if(Notification.permission === 'denied') return box('Las notificaciones están bloqueadas. Activalas en Ajustes > Notificaciones > Mi agenda y volvé a abrir la app.');
+  const msg = push.msg ? `<p class="sub" style="margin:10px 4px 0;font-weight:800">${esc(push.msg)}</p>` : '';
+  if(push.on) return box('Activadas en este dispositivo. Elegí “Recordarme” al crear o editar un evento.',
+    `<div class="row2"><button class="btn primary" data-act="push-test">Mandar una prueba</button><button class="btn ghost" data-act="push-off">Desactivar</button></div>${msg}`);
+  return box('Te avisa antes de tus eventos, aunque la app esté cerrada.',
+    `<button class="btn primary" style="width:100%" data-act="push-on"${push.busy ? ' disabled' : ''}>${push.busy ? 'Activando…' : 'Activar notificaciones'}</button>${msg}`);
+}
+/* Abrir en el día del aviso (al tocar la notificación) */
+function openDayFromUrl(u){
+  const m = String(u || '').match(/dia=(\d{4}-\d{2}-\d{2})/); if(!m) return;
+  sel = m[1]; const d = parse(sel); view = {y:d.getFullYear(), m:d.getMonth()}; route = 'cal'; closeAll(); renderAll();
+}
+if('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if(e.data && e.data.abrir) openDayFromUrl(e.data.abrir); });
 function syncSection(){
   const head = `<h2>Sincronizar celular y computadora</h2>`;
   if(!cloud.configured()) return `<section class="block set">${head}<p class="sub">Todavía no está conectada. Cuando sigas la guía y conectes Supabase, vas a poder entrar con tu cuenta y ver los mismos datos en el celular y en la compu.</p></section>`;
@@ -1679,7 +1772,8 @@ $('wPrev').innerHTML = ico('left',18,2.4);
 $('wNext').innerHTML = ico('right',18,2.4);
 $('topAdd').innerHTML = ico('plus',18,2.4) + ' Nuevo evento';
 applyLayout();
-cloud.init();
+cloud.init().then(pushCheck);
+openDayFromUrl(location.search);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }

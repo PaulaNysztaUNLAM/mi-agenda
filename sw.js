@@ -1,5 +1,5 @@
 // Guarda la app en el dispositivo para que abra rápido y funcione sin internet.
-const CACHE = 'mi-agenda-v2';
+const CACHE = 'mi-agenda-v3';
 const SHELL = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 const CDN = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net'];
 
@@ -35,4 +35,24 @@ self.addEventListener('fetch', e => {
     })));
   }
   // Lo demás (por ejemplo, Supabase) va directo a internet, sin guardar copias viejas.
+});
+
+// Recordatorios: muestra el aviso que manda Supabase.
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Mi agenda', {
+    body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: d.tag, data: { url: d.url || './' }
+  }));
+});
+// Al tocar el aviso: abre la app (o la trae al frente) en ese día.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) {
+      if ('focus' in c) { c.postMessage({ abrir: url }); return c.focus(); }
+    }
+    return clients.openWindow(url);
+  }));
 });
