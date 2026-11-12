@@ -708,7 +708,7 @@ function renderDay(){
       else time = e.end ? `${fmtT(e.start)} – ${fmtT(e.end)}` : fmtT(e.start);
     }
     const pre = e.type === 'examen' ? 'Examen: ' : e.type === 'tp' ? 'Entrega TP: ' : e.type === 'viaje' ? 'Viaje a ' : '';
-    return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}" data-occ="${e._occ}">
+    return `<div class="ev" role="button" tabindex="0" data-act="edit" data-id="${e.id}" data-occ="${e._occ}"${state.colors && state.colors[e.type] ? ` style="background:${state.colors[e.type]}66"` : ''}>
       <span class="ic">${ico(state.icons[e.type] === 'none' ? 'dot' : state.icons[e.type],18)}</span>
       <span class="body"><div class="time">${time}${e.repeat ? `<span class="rep" title="${REPEAT_TXT[e.repeat]}">${ico('repeat',13)}</span>` : ''}${e.remind && e.remind.length ? `<span class="rep" title="Tiene recordatorio" aria-label="Tiene recordatorio">${ico('bell',13)}</span>` : ''}</div><div class="name">${esc(pre+e.title)}</div>${(() => { const st = STATUS[statusOf(e, e._occ)]; return st ? `<div class="mst">${st.check ? `<span style="color:${st.dot};display:inline-flex" aria-hidden="true">${ico('check',12,3.6)}</span>` : `<i style="background:${st.dot}"></i>`}${st.label}</div>` : ''; })()}${e.subs && e.subs.length ? (() => { const dn = e.subs.filter(x => x.done).length; return `<div class="mprog"><b><i style="width:${Math.round(dn * 100 / e.subs.length)}%"></i></b><span>${dn}/${e.subs.length} subtareas</span></div>`; })() : ''}</span>
       <button class="del" data-act="del" data-id="${e.id}" data-occ="${e._occ}" aria-label="${e.repeat ? 'Eliminar solo este día de ' : 'Eliminar '}${esc(e.title)}">${ico('trash',17)}</button>
