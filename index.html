@@ -461,6 +461,7 @@ const P = {
   heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.8 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
   bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
   coffee:'<path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4ZM6 2v2M10 2v2M14 2v2"/>',
+  champagne:'<path d="M8 2h8l-1 8a3 3 0 0 1-6 0L8 2z"/><path d="M12 13v8M8 21h8M8.5 6h7"/>',
   dumbbell:'<path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/>',
   cake:'<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1M2 21h20M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01"/>',
   gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
@@ -490,8 +491,8 @@ function ico(n, s=20, w=2){
   if(!n || n==='none') return '';
   return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 }
-const ICON_CHOICES = ['plane','suitcase','pin','exam','clipboard','cap','pencil','book','notebook','laptop','folder','code','flask','wallet','cart','star','heart','cake','gift','medical','users','briefcase','ball','bell','coffee','dumbbell','music','dot','none'];
-const ICON_NAMES = {plane:'Avión',suitcase:'Valija',pin:'Ubicación',exam:'Hoja de examen',clipboard:'Planilla',cap:'Birrete',pencil:'Lápiz',book:'Libro',notebook:'Cuaderno',wallet:'Billetera',cart:'Carrito',laptop:'Notebook',folder:'Carpeta',code:'Código',flask:'Laboratorio',star:'Estrella',heart:'Corazón',cake:'Torta',gift:'Regalo',medical:'Salud',users:'Personas',briefcase:'Trabajo',ball:'Deporte',bell:'Campana',coffee:'Café',dumbbell:'Pesas',music:'Música',dot:'Punto',none:'Sin ícono'};
+const ICON_CHOICES = ['plane','suitcase','pin','exam','clipboard','cap','pencil','book','notebook','laptop','folder','code','flask','wallet','cart','star','heart','cake','gift','medical','users','briefcase','ball','bell','coffee','champagne','dumbbell','music','dot','none'];
+const ICON_NAMES = {plane:'Avión',suitcase:'Valija',pin:'Ubicación',exam:'Hoja de examen',clipboard:'Planilla',cap:'Birrete',pencil:'Lápiz',book:'Libro',notebook:'Cuaderno',wallet:'Billetera',cart:'Carrito',laptop:'Notebook',folder:'Carpeta',code:'Código',flask:'Laboratorio',star:'Estrella',heart:'Corazón',cake:'Torta',gift:'Regalo',medical:'Salud',users:'Personas',briefcase:'Trabajo',ball:'Deporte',bell:'Campana',coffee:'Café',champagne:'Copa de champagne',dumbbell:'Pesas',music:'Música',dot:'Punto',none:'Sin ícono'};
 const BASE_TYPES = {
   evento:{label:'Evento', field:'Título', ph:'Ej: Turno con el dentista'},
   examen:{label:'Examen', field:'Materia', ph:'Ej: Química General'},
